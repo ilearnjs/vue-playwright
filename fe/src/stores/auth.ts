@@ -60,16 +60,41 @@ export const useAuthStore = defineStore('auth', () => {
     Cookies.remove(COOKIE_NAME, { path: '/' })
   }
 
-  // Initialize user from cookie on app start
-  const initializeAuth = () => {
+  // Initialize user from API verification on app start
+  const initializeAuth = async () => {
     const storedUser = Cookies.get(COOKIE_NAME)
-    if (storedUser) {
-      try {
-        user.value = JSON.parse(storedUser)
-      } catch {
-        // Remove invalid cookie
-        Cookies.remove(COOKIE_NAME, { path: '/' })
+    if (!storedUser) {
+      return // No stored user, remain unauthenticated
+    }
+
+    try {
+      // Parse stored user to get email for API call
+      const userData = JSON.parse(storedUser)
+      if (!userData.email) {
+        throw new Error('No email in stored user data')
       }
+
+      // Verify user session with API
+      isLoading.value = true
+      const response = await authApi.getCurrentUser(userData.email)
+
+      if (response.success && response.user) {
+        // Update user with fresh data from API
+        user.value = response.user
+        // Update cookie with fresh data
+        Cookies.set(COOKIE_NAME, JSON.stringify(response.user), COOKIE_OPTIONS)
+      } else {
+        // Session invalid, clear local data
+        throw new Error(response.error || 'Session expired')
+      }
+    } catch (err) {
+      // Clear invalid cookie and local state
+      Cookies.remove(COOKIE_NAME, { path: '/' })
+      user.value = null
+      // Don't set error state during initialization - just fail silently
+      console.warn('Authentication initialization failed:', err instanceof Error ? err.message : 'Unknown error')
+    } finally {
+      isLoading.value = false
     }
   }
 

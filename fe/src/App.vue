@@ -1,7 +1,18 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <AppNavigation v-if="showNavigation" />
-    <RouterView />
+    <!-- Show loading during auth initialization -->
+    <div v-if="authStore.isLoading && !authStore.user" class="min-h-screen flex items-center justify-center">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p class="text-gray-600">Initializing...</p>
+      </div>
+    </div>
+
+    <!-- Main app content -->
+    <div v-else>
+      <AppNavigation v-if="showNavigation" />
+      <RouterView />
+    </div>
   </div>
 </template>
 
@@ -15,7 +26,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const showNavigation = computed(() => route.name !== 'auth')
 
-onMounted(() => {
-  authStore.initializeAuth()
+onMounted(async () => {
+  await authStore.initializeAuth()
 })
 </script>

@@ -74,5 +74,40 @@ export const authApi = {
     } catch {
       return { success: false }
     }
+  },
+
+  /**
+   * Mock get current user API call
+   * In production, this would fetch user info from the server using session/token
+   */
+  async getCurrentUser(email: string): Promise<LoginResponse> {
+    try {
+      // Simulate API delay
+      await delay(800)
+
+      // Mock user lookup - in real app this would validate session and fetch user data
+      if (email === 'demo@example.com') {
+        const user: User = {
+          id: '1',
+          email: email,
+          name: 'Demo User'
+        }
+
+        return {
+          success: true,
+          user
+        }
+      } else {
+        return {
+          success: false,
+          error: 'User not found or session expired'
+        }
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get current user'
+      }
+    }
   }
 }
