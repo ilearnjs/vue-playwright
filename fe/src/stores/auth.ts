@@ -1,16 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-
-export interface User {
-  id: string
-  email: string
-  name: string
-}
-
-export interface LoginCredentials {
-  email: string
-  password: string
-}
+import Cookies from 'js-cookie'
+import { authApi, type User, type LoginCredentials } from '@/api'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -19,29 +10,33 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!user.value)
 
-  // Mock API call for sign in
+  // Cookie configuration
+  const COOKIE_NAME = 'auth_user'
+  const COOKIE_OPTIONS = {
+    expires: 7, // 7 days
+    secure: location.protocol === 'https:', // Only send over HTTPS in production
+    sameSite: 'strict' as const, // CSRF protection
+    path: '/'
+  }
+
+  // Sign in using API
   const signIn = async (credentials: LoginCredentials): Promise<boolean> => {
     isLoading.value = true
     error.value = null
 
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await authApi.signIn(credentials)
 
-      // Mock validation - in real app this would be handled by backend
-      if (credentials.email === 'demo@example.com' && credentials.password === 'password') {
-        user.value = {
-          id: '1',
-          email: credentials.email,
-          name: 'Demo User'
-        }
+      if (response.success && response.user) {
+        user.value = response.user
 
-        // Store in localStorage for persistence
-        localStorage.setItem('auth_user', JSON.stringify(user.value))
+        // Store in cookie for persistence
+        Cookies.set(COOKIE_NAME, JSON.stringify(user.value), COOKIE_OPTIONS)
 
         return true
       } else {
-        throw new Error('Invalid email or password')
+        error.value = response.error || 'Sign in failed'
+        return false
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Sign in failed'
@@ -51,20 +46,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  const signOut = () => {
+  const signOut = async () => {
+    try {
+      // Call API to invalidate session on server
+      await authApi.signOut()
+    } catch {
+      // Continue with local sign out even if API call fails
+    }
+
+    // Clear local state and cookie
     user.value = null
     error.value = null
-    localStorage.removeItem('auth_user')
+    Cookies.remove(COOKIE_NAME, { path: '/' })
   }
 
-  // Initialize user from localStorage on app start
+  // Initialize user from cookie on app start
   const initializeAuth = () => {
-    const storedUser = localStorage.getItem('auth_user')
+    const storedUser = Cookies.get(COOKIE_NAME)
     if (storedUser) {
       try {
         user.value = JSON.parse(storedUser)
       } catch {
-        localStorage.removeItem('auth_user')
+        // Remove invalid cookie
+        Cookies.remove(COOKIE_NAME, { path: '/' })
       }
     }
   }
