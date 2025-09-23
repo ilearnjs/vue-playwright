@@ -1,16 +1,3 @@
-<script setup lang="ts">
-import { RouterLink, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-
-const router = useRouter()
-const authStore = useAuthStore()
-
-const handleSignOut = () => {
-  authStore.signOut()
-  router.push('/')
-}
-</script>
-
 <template>
   <nav class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,3 +50,16 @@ const handleSignOut = () => {
     </div>
   </nav>
 </template>
+
+<script setup lang="ts">
+import { RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const handleSignOut = () => {
+  authStore.signOut()
+  router.push('/')
+}
+</script>

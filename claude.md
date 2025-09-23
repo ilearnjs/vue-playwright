@@ -11,7 +11,7 @@
 - use composition api
 - use single quote for script
 - use double quote for template
-- component order:
+- sfc order:
   - template
   - script
   - style

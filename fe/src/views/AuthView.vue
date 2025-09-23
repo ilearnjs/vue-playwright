@@ -1,40 +1,3 @@
-<script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-
-const router = useRouter()
-const authStore = useAuthStore()
-
-const email = ref('')
-const password = ref('')
-
-onMounted(() => {
-  // Clear any existing errors when component mounts
-  authStore.clearError()
-
-  // If already authenticated, redirect to home
-  if (authStore.isAuthenticated) {
-    router.push('/')
-  }
-})
-
-const handleSubmit = async () => {
-  if (!email.value || !password.value) {
-    return
-  }
-
-  const success = await authStore.signIn({
-    email: email.value,
-    password: password.value
-  })
-
-  if (success) {
-    router.push('/')
-  }
-}
-</script>
-
 <template>
   <main class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
@@ -134,3 +97,40 @@ const handleSubmit = async () => {
     </div>
   </main>
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const email = ref('')
+const password = ref('')
+
+onMounted(() => {
+  // Clear any existing errors when component mounts
+  authStore.clearError()
+
+  // If already authenticated, redirect to home
+  if (authStore.isAuthenticated) {
+    router.push('/')
+  }
+})
+
+const handleSubmit = async () => {
+  if (!email.value || !password.value) {
+    return
+  }
+
+  const success = await authStore.signIn({
+    email: email.value,
+    password: password.value
+  })
+
+  if (success) {
+    router.push('/')
+  }
+}
+</script>
