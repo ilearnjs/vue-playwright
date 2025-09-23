@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+const handleSignOut = () => {
+  authStore.signOut()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -12,7 +21,7 @@ import { RouterLink } from 'vue-router'
           </RouterLink>
         </div>
 
-        <div class="flex space-x-8">
+        <div class="flex items-center space-x-8">
           <RouterLink
             to="/"
             class="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
@@ -27,7 +36,23 @@ import { RouterLink } from 'vue-router'
           >
             About
           </RouterLink>
+
+          <!-- Authenticated User Menu -->
+          <div v-if="authStore.isAuthenticated" class="flex items-center space-x-4">
+            <span class="text-sm text-gray-700">
+              Welcome, {{ authStore.user?.name }}
+            </span>
+            <button
+              @click="handleSignOut"
+              class="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
+
+          <!-- Sign In Link for Unauthenticated Users -->
           <RouterLink
+            v-else
             to="/auth"
             class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
           >
