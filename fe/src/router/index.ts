@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,6 +9,12 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/auth',
+      name: 'auth',
+      component: () => import('../views/AuthView.vue'),
     },
     {
       path: '/about',
@@ -15,6 +22,31 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
   ],
+})
+
+// Route guard for authentication
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
+
+  // Wait for auth initialization if it's still loading
+  if (authStore.isLoading) {
+    await new Promise<void>((resolve) => {
+      const unwatch = authStore.$subscribe(() => {
+        if (!authStore.isLoading) {
+          unwatch()
+          resolve()
+        }
+      })
+    })
+  }
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return '/auth'
+  }
+
+  if (to.name === 'auth' && authStore.isAuthenticated) {
+    return '/'
+  }
 })
 
 export default router

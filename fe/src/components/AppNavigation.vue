@@ -51,6 +51,6 @@ const authStore = useAuthStore()
 
 const handleSignOut = async () => {
   await authStore.signOut()
-  router.push('/')
+  router.push('/auth')
 }
 </script>
