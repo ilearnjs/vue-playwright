@@ -1,13 +1,13 @@
 <template>
-  <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ authStore.user?.name }}!</h1>
-      <p class="text-gray-600">Here's your financial overview for today.</p>
+  <main class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-12">
+    <div class="mb-6 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ authStore.user?.name }}!</h1>
+      <p class="text-gray-600 text-sm sm:text-base">Here's your financial overview for today.</p>
     </div>
 
     <!-- Loading state -->
-    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex items-center">
           <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
@@ -19,17 +19,17 @@
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex items-center">
-          <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+          <div class="w-10 sm:w-12 h-10 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+            <div class="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-gray-400"></div>
           </div>
           <div class="flex-1">
             <p class="text-sm text-gray-600">This Month's Change</p>
-            <div class="h-8 bg-gray-200 rounded animate-pulse mt-1 mb-2"></div>
+            <div class="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 mb-2"></div>
             <div class="flex justify-between">
-              <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
-              <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+              <div class="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
+              <div class="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
             </div>
           </div>
         </div>
@@ -37,54 +37,54 @@
     </div>
 
     <!-- Data loaded -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex items-center">
-          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+            <svg class="w-5 sm:w-6 h-5 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
             </svg>
           </div>
           <div>
-            <p class="text-sm text-gray-600">Total Balance</p>
-            <p class="text-2xl font-bold text-gray-900">${{ balance?.toLocaleString() || '0.00' }}</p>
+            <p class="text-xs sm:text-sm text-gray-600">Total Balance</p>
+            <p class="text-xl sm:text-2xl font-bold text-gray-900">${{ balance?.toLocaleString() || '0.00' }}</p>
           </div>
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex items-center">
           <div :class="[
-            'w-12 h-12 rounded-lg flex items-center justify-center mr-4',
+            'w-10 sm:w-12 h-10 sm:h-12 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0',
             (monthlyChange || 0) >= 0 ? 'bg-blue-100' : 'bg-orange-100'
           ]">
             <svg :class="[
-              'w-6 h-6',
+              'w-5 sm:w-6 h-5 sm:h-6',
               (monthlyChange || 0) >= 0 ? 'text-blue-600' : 'text-orange-600'
             ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="(monthlyChange || 0) >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6'"></path>
             </svg>
           </div>
-          <div class="flex-1">
-            <p class="text-sm text-gray-600">This Month's Change</p>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm text-gray-600">This Month's Change</p>
             <p :class="[
-              'text-2xl font-bold mb-2',
+              'text-lg sm:text-2xl font-bold mb-1 sm:mb-2',
               (monthlyChange || 0) >= 0 ? 'text-blue-600' : 'text-orange-600'
             ]">
               {{ (monthlyChange || 0) >= 0 ? '+' : '' }}${{ monthlyChange?.toLocaleString() || '0.00' }}
             </p>
-            <div class="flex justify-between text-sm">
+            <div class="flex justify-between text-xs sm:text-sm">
               <div class="flex items-center text-green-600">
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-2.5 sm:w-3 h-2.5 sm:h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
                 </svg>
-                <span>+${{ monthlyIncome?.toLocaleString() || '0.00' }}</span>
+                <span class="truncate">+${{ monthlyIncome?.toLocaleString() || '0.00' }}</span>
               </div>
               <div class="flex items-center text-red-600">
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-2.5 sm:w-3 h-2.5 sm:h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                 </svg>
-                <span>-${{ monthlyExpenses?.toLocaleString() || '0.00' }}</span>
+                <span class="truncate">-${{ monthlyExpenses?.toLocaleString() || '0.00' }}</span>
               </div>
             </div>
           </div>
@@ -92,27 +92,27 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold text-gray-900">Recent Transactions</h2>
-        <div class="flex space-x-3">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-0">Recent Transactions</h2>
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             @click="addIncome"
-            class="flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            class="flex items-center justify-center px-3 sm:px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
             </svg>
-            Add Income
+            <span class="hidden xs:inline">Add </span>Income
           </button>
           <button
             @click="addExpense"
-            class="flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+            class="flex items-center justify-center px-3 sm:px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
             </svg>
-            Add Expense
+            <span class="hidden xs:inline">Add </span>Expense
           </button>
         </div>
       </div>
@@ -134,15 +134,15 @@
       </div>
 
       <!-- Transactions loaded -->
-      <div v-else class="space-y-3">
-        <div v-for="transaction in transactions" :key="transaction.id" class="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-gray-50 group">
-          <div class="flex items-center">
+      <div v-else class="space-y-2 sm:space-y-3">
+        <div v-for="transaction in transactions" :key="transaction.id" class="flex items-center justify-between py-2 sm:py-3 px-1 sm:px-2 rounded-lg hover:bg-gray-50 group">
+          <div class="flex items-center flex-1 min-w-0">
             <div :class="[
-              'w-10 h-10 rounded-lg flex items-center justify-center mr-3',
+              'w-8 sm:w-10 h-8 sm:h-10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0',
               transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
             ]">
               <svg :class="[
-                'w-5 h-5',
+                'w-4 sm:w-5 h-4 sm:h-5',
                 transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
               ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -153,37 +153,37 @@
                 ></path>
               </svg>
             </div>
-            <div>
-              <p class="font-medium text-gray-900">{{ transaction.type === 'income' ? 'Income' : 'Expense' }}</p>
-              <p class="text-sm text-gray-500">{{ transaction.date }}, {{ transaction.timestamp }}</p>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-900 text-sm sm:text-base">{{ transaction.type === 'income' ? 'Income' : 'Expense' }}</p>
+              <p class="text-xs sm:text-sm text-gray-500 truncate">{{ transaction.date }}, {{ transaction.timestamp }}</p>
             </div>
           </div>
 
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
             <p :class="[
-              'font-semibold',
+              'font-semibold text-sm sm:text-base',
               transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
             ]">
               {{ transaction.type === 'income' ? '+' : '-' }}${{ transaction.amount.toLocaleString() }}
             </p>
 
-            <!-- Action buttons (shown on hover) -->
-            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <!-- Action buttons (always visible on mobile, hover on desktop) -->
+            <div class="flex items-center space-x-1 sm:space-x-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
               <button
                 @click="editTransaction(transaction)"
-                class="p-1 text-gray-400 hover:text-blue-600 focus:outline-none focus:text-blue-600"
+                class="p-1 sm:p-1.5 text-gray-400 hover:text-blue-600 focus:outline-none focus:text-blue-600"
                 title="Edit transaction"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
               </button>
               <button
                 @click="deleteTransaction(transaction)"
-                class="p-1 text-gray-400 hover:text-red-600 focus:outline-none focus:text-red-600"
+                class="p-1 sm:p-1.5 text-gray-400 hover:text-red-600 focus:outline-none focus:text-red-600"
                 title="Delete transaction"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 sm:w-4 h-3.5 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                 </svg>
               </button>
