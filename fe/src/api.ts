@@ -15,6 +15,32 @@ export interface LoginResponse {
   error?: string
 }
 
+export interface Transaction {
+  id: string
+  type: 'income' | 'expense'
+  amount: number
+  date: string
+  timestamp: string
+}
+
+export interface BalanceResponse {
+  success: boolean
+  balance?: number
+  error?: string
+}
+
+export interface ExpensesResponse {
+  success: boolean
+  expenses?: number
+  error?: string
+}
+
+export interface HistoryResponse {
+  success: boolean
+  transactions?: Transaction[]
+  error?: string
+}
+
 // Mock API configuration
 const API_CONFIG = {
   timeout: 1000, // Simulate network delay
@@ -107,6 +133,90 @@ export const authApi = {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get current user'
+      }
+    }
+  }
+}
+
+// Mock dashboard API calls
+export const dashboardApi = {
+  /**
+   * Mock get total balance API call
+   */
+  async getTotalBalance(): Promise<BalanceResponse> {
+    try {
+      await delay(600)
+
+      return {
+        success: true,
+        balance: 12450.30
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get balance'
+      }
+    }
+  },
+
+  /**
+   * Mock get month's expenses API call
+   */
+  async getMonthsExpenses(): Promise<ExpensesResponse> {
+    try {
+      await delay(700)
+
+      return {
+        success: true,
+        expenses: 2840.75
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get expenses'
+      }
+    }
+  },
+
+  /**
+   * Mock get transaction history API call
+   */
+  async getHistory(): Promise<HistoryResponse> {
+    try {
+      await delay(800)
+
+      const mockTransactions: Transaction[] = [
+        {
+          id: '1',
+          type: 'expense',
+          amount: 87.45,
+          date: 'Today',
+          timestamp: '2:30 PM'
+        },
+        {
+          id: '2',
+          type: 'income',
+          amount: 3250.00,
+          date: 'Yesterday',
+          timestamp: '9:00 AM'
+        },
+        {
+          id: '3',
+          type: 'expense',
+          amount: 120.50,
+          date: 'Dec 1',
+          timestamp: '4:15 PM'
+        }
+      ]
+
+      return {
+        success: true,
+        transactions: mockTransactions
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to get transaction history'
       }
     }
   }
