@@ -24,9 +24,13 @@
           <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
             <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
           </div>
-          <div>
-            <p class="text-sm text-gray-600">This Month's Expenses</p>
-            <div class="h-8 bg-gray-200 rounded animate-pulse mt-1"></div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-600">This Month's Change</p>
+            <div class="h-8 bg-gray-200 rounded animate-pulse mt-1 mb-2"></div>
+            <div class="flex justify-between">
+              <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+              <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -50,14 +54,39 @@
 
       <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
         <div class="flex items-center">
-          <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
-            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+          <div :class="[
+            'w-12 h-12 rounded-lg flex items-center justify-center mr-4',
+            (monthlyChange || 0) >= 0 ? 'bg-blue-100' : 'bg-orange-100'
+          ]">
+            <svg :class="[
+              'w-6 h-6',
+              (monthlyChange || 0) >= 0 ? 'text-blue-600' : 'text-orange-600'
+            ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="(monthlyChange || 0) >= 0 ? 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6' : 'M13 17h8m0 0V9m0 8l-8-8-4 4-6-6'"></path>
             </svg>
           </div>
-          <div>
-            <p class="text-sm text-gray-600">This Month's Expenses</p>
-            <p class="text-2xl font-bold text-gray-900">${{ expenses?.toLocaleString() || '0.00' }}</p>
+          <div class="flex-1">
+            <p class="text-sm text-gray-600">This Month's Change</p>
+            <p :class="[
+              'text-2xl font-bold mb-2',
+              (monthlyChange || 0) >= 0 ? 'text-blue-600' : 'text-orange-600'
+            ]">
+              {{ (monthlyChange || 0) >= 0 ? '+' : '' }}${{ monthlyChange?.toLocaleString() || '0.00' }}
+            </p>
+            <div class="flex justify-between text-sm">
+              <div class="flex items-center text-green-600">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                </svg>
+                <span>+${{ monthlyIncome?.toLocaleString() || '0.00' }}</span>
+              </div>
+              <div class="flex items-center text-red-600">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+                <span>-${{ monthlyExpenses?.toLocaleString() || '0.00' }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -176,7 +205,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { dashboardApi, type Transaction, type CreateTransactionRequest, type UpdateTransactionRequest } from '@/api'
 import TransactionModal from './TransactionModal.vue'
@@ -185,8 +214,15 @@ const authStore = useAuthStore()
 
 const isLoading = ref(true)
 const balance = ref<number | null>(null)
-const expenses = ref<number | null>(null)
+const monthlyIncome = ref<number | null>(null)
+const monthlyExpenses = ref<number | null>(null)
 const transactions = ref<Transaction[]>([])
+
+// Computed property for monthly change
+const monthlyChange = computed(() => {
+  if (monthlyIncome.value === null || monthlyExpenses.value === null) return null
+  return monthlyIncome.value - monthlyExpenses.value
+})
 
 // Modal state
 const showModal = ref(false)
@@ -198,9 +234,9 @@ const loadDashboardData = async () => {
 
   try {
     // Load all dashboard data in parallel
-    const [balanceResponse, expensesResponse, historyResponse] = await Promise.all([
+    const [balanceResponse, monthlyDataResponse, historyResponse] = await Promise.all([
       dashboardApi.getTotalBalance(),
-      dashboardApi.getMonthsExpenses(),
+      dashboardApi.getMonthlyData(),
       dashboardApi.getHistory()
     ])
 
@@ -208,8 +244,9 @@ const loadDashboardData = async () => {
       balance.value = balanceResponse.balance || 0
     }
 
-    if (expensesResponse.success) {
-      expenses.value = expensesResponse.expenses || 0
+    if (monthlyDataResponse.success) {
+      monthlyIncome.value = monthlyDataResponse.income || 0
+      monthlyExpenses.value = monthlyDataResponse.expenses || 0
     }
 
     if (historyResponse.success) {
@@ -254,12 +291,13 @@ const deleteTransaction = async (transaction: Transaction) => {
       if (index !== -1) {
         transactions.value.splice(index, 1)
 
-        // Update balance and expenses
+        // Update balance and monthly data
         if (transaction.type === 'income') {
           balance.value = (balance.value || 0) - transaction.amount
+          monthlyIncome.value = (monthlyIncome.value || 0) - transaction.amount
         } else {
           balance.value = (balance.value || 0) + transaction.amount
-          expenses.value = (expenses.value || 0) - transaction.amount
+          monthlyExpenses.value = (monthlyExpenses.value || 0) - transaction.amount
         }
       }
     } else {
@@ -294,20 +332,22 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
         if (index !== -1) {
           const oldTransaction = transactions.value[index]
 
-          // Reverse old transaction effect on balance/expenses
+          // Reverse old transaction effect on balance and monthly data
           if (oldTransaction.type === 'income') {
             balance.value = (balance.value || 0) - oldTransaction.amount
+            monthlyIncome.value = (monthlyIncome.value || 0) - oldTransaction.amount
           } else {
             balance.value = (balance.value || 0) + oldTransaction.amount
-            expenses.value = (expenses.value || 0) - oldTransaction.amount
+            monthlyExpenses.value = (monthlyExpenses.value || 0) - oldTransaction.amount
           }
 
           // Apply new transaction effect
           if (data.type === 'income') {
             balance.value = (balance.value || 0) + data.amount
+            monthlyIncome.value = (monthlyIncome.value || 0) + data.amount
           } else {
             balance.value = (balance.value || 0) - data.amount
-            expenses.value = (expenses.value || 0) + data.amount
+            monthlyExpenses.value = (monthlyExpenses.value || 0) + data.amount
           }
 
           // Update transaction in list
@@ -326,12 +366,13 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
         // Add new transaction to the beginning of the list
         transactions.value.unshift(response.transaction)
 
-        // Update balance and expenses
+        // Update balance and monthly data
         if (data.type === 'income') {
           balance.value = (balance.value || 0) + data.amount
+          monthlyIncome.value = (monthlyIncome.value || 0) + data.amount
         } else {
           balance.value = (balance.value || 0) - data.amount
-          expenses.value = (expenses.value || 0) + data.amount
+          monthlyExpenses.value = (monthlyExpenses.value || 0) + data.amount
         }
 
         closeModal()

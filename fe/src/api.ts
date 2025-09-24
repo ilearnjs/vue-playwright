@@ -29,8 +29,9 @@ export interface BalanceResponse {
   error?: string
 }
 
-export interface ExpensesResponse {
+export interface MonthlyDataResponse {
   success: boolean
+  income?: number
   expenses?: number
   error?: string
 }
@@ -188,20 +189,21 @@ export const dashboardApi = {
   },
 
   /**
-   * Mock get month's expenses API call
+   * Mock get monthly data API call
    */
-  async getMonthsExpenses(): Promise<ExpensesResponse> {
+  async getMonthlyData(): Promise<MonthlyDataResponse> {
     try {
       await delay(700)
 
       return {
         success: true,
+        income: 5250.00,
         expenses: 2840.75
       }
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get expenses'
+        error: error instanceof Error ? error.message : 'Failed to get monthly data'
       }
     }
   },
