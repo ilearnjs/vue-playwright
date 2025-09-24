@@ -4,7 +4,7 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <RouterLink to="/" class="text-xl font-bold text-gray-900 hover:text-indigo-600 transition-colors">
-            Vue App
+            FinanceTracker
           </RouterLink>
         </div>
 
