@@ -17,14 +17,13 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView, useRoute } from 'vue-router'
+import { RouterView } from 'vue-router'
 import AppNavigation from './components/AppNavigation.vue'
 import { computed, onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 
-const route = useRoute()
 const authStore = useAuthStore()
-const showNavigation = computed(() => route.name !== 'auth')
+const showNavigation = computed(() => authStore.isAuthenticated)
 
 onMounted(async () => {
   await authStore.initializeAuth()

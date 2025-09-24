@@ -25,7 +25,7 @@
           </RouterLink>
 
           <!-- Authenticated User Menu -->
-          <div v-if="authStore.isAuthenticated" class="flex items-center space-x-4">
+          <div class="flex items-center space-x-4">
             <span class="text-sm text-gray-700">
               Welcome, {{ authStore.user?.name }}
             </span>
@@ -36,15 +36,6 @@
               Sign Out
             </button>
           </div>
-
-          <!-- Sign In Link for Unauthenticated Users -->
-          <RouterLink
-            v-else
-            to="/auth"
-            class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
-          >
-            Sign In
-          </RouterLink>
         </div>
       </div>
     </div>
