@@ -41,6 +41,34 @@ export interface HistoryResponse {
   error?: string
 }
 
+export interface CreateTransactionRequest {
+  type: 'income' | 'expense'
+  amount: number
+}
+
+export interface CreateTransactionResponse {
+  success: boolean
+  transaction?: Transaction
+  error?: string
+}
+
+export interface UpdateTransactionRequest {
+  id: string
+  type: 'income' | 'expense'
+  amount: number
+}
+
+export interface UpdateTransactionResponse {
+  success: boolean
+  transaction?: Transaction
+  error?: string
+}
+
+export interface DeleteTransactionResponse {
+  success: boolean
+  error?: string
+}
+
 // Mock API configuration
 const API_CONFIG = {
   timeout: 1000, // Simulate network delay
@@ -217,6 +245,80 @@ export const dashboardApi = {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get transaction history'
+      }
+    }
+  },
+
+  /**
+   * Mock create transaction API call
+   */
+  async createTransaction(data: CreateTransactionRequest): Promise<CreateTransactionResponse> {
+    try {
+      await delay(1000)
+
+      // Create new transaction with mock data
+      const newTransaction: Transaction = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: data.type,
+        amount: data.amount,
+        date: 'Today',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+
+      return {
+        success: true,
+        transaction: newTransaction
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to create transaction'
+      }
+    }
+  },
+
+  /**
+   * Mock update transaction API call
+   */
+  async updateTransaction(data: UpdateTransactionRequest): Promise<UpdateTransactionResponse> {
+    try {
+      await delay(800)
+
+      // Update transaction with mock data
+      const updatedTransaction: Transaction = {
+        id: data.id,
+        type: data.type,
+        amount: data.amount,
+        date: 'Today', // In real app, this would preserve original date or update it
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+
+      return {
+        success: true,
+        transaction: updatedTransaction
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to update transaction'
+      }
+    }
+  },
+
+  /**
+   * Mock delete transaction API call
+   */
+  async deleteTransaction(id: string): Promise<DeleteTransactionResponse> {
+    try {
+      await delay(500)
+
+      return {
+        success: true
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to delete transaction'
       }
     }
   }
