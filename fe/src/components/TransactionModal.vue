@@ -2,38 +2,38 @@
   <!-- Modal backdrop -->
   <div
     v-if="isOpen"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3"
     @click="closeModal"
   >
     <!-- Modal content -->
     <div
-      class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+      class="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md"
       @click.stop
     >
       <!-- Modal header -->
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-semibold text-gray-900">
+      <div class="flex justify-between items-center mb-4 sm:mb-6">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-900">
           {{ isEdit ? 'Edit' : 'Add' }} {{ type === 'income' ? 'Income' : 'Expense' }}
         </h2>
         <button
           @click="closeModal"
-          class="text-gray-400 hover:text-gray-600 focus:outline-none"
+          class="text-gray-400 hover:text-gray-600 focus:outline-none p-1"
         >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 sm:w-6 h-5 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
 
       <!-- Error message -->
-      <div v-if="error" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-        <p class="text-sm text-red-600">{{ error }}</p>
+      <div v-if="error" class="mb-3 sm:mb-4 p-2.5 sm:p-3 bg-red-50 border border-red-200 rounded-md">
+        <p class="text-xs sm:text-sm text-red-600">{{ error }}</p>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="handleSubmit">
-        <div class="mb-4">
-          <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+        <div class="mb-4 sm:mb-4">
+          <label for="amount" class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Amount ($)
           </label>
           <input
@@ -44,18 +44,18 @@
             min="0"
             required
             :disabled="isLoading"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+            class="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed text-base sm:text-sm"
             placeholder="0.00"
           />
         </div>
 
         <!-- Form buttons -->
-        <div class="flex justify-end space-x-3">
+        <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
           <button
             type="button"
             @click="closeModal"
             :disabled="isLoading"
-            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2.5 sm:py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
           >
             Cancel
           </button>
@@ -63,10 +63,12 @@
             type="submit"
             :disabled="isLoading || !amount || Number(amount) <= 0"
             :class="[
-              'px-4 py-2 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center',
-              type === 'income'
-                ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
-                : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+              'px-4 py-2.5 sm:py-2 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm',
+              isEdit
+                ? 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+                : type === 'income'
+                  ? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+                  : 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
             ]"
           >
             <svg

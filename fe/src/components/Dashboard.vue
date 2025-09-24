@@ -201,6 +201,17 @@
       @close="closeModal"
       @submit="handleTransactionSubmit"
     />
+
+    <!-- Confirmation Modal -->
+    <ConfirmationModal
+      :is-open="showConfirmModal"
+      title="Delete Transaction"
+      message="Are you sure you want to delete this transaction? This action cannot be undone."
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      @confirm="confirmDelete"
+      @cancel="closeConfirmModal"
+    />
   </main>
 </template>
 
@@ -209,6 +220,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { dashboardApi, type Transaction, type CreateTransactionRequest, type UpdateTransactionRequest } from '@/api'
 import TransactionModal from './TransactionModal.vue'
+import ConfirmationModal from './ConfirmationModal.vue'
 
 const authStore = useAuthStore()
 
@@ -228,6 +240,10 @@ const monthlyChange = computed(() => {
 const showModal = ref(false)
 const modalType = ref<'income' | 'expense'>('income')
 const editingTransaction = ref<Transaction | null>(null)
+
+// Confirmation modal state
+const showConfirmModal = ref(false)
+const transactionToDelete = ref<Transaction | null>(null)
 
 const loadDashboardData = async () => {
   isLoading.value = true
@@ -277,10 +293,14 @@ const editTransaction = (transaction: Transaction) => {
   showModal.value = true
 }
 
-const deleteTransaction = async (transaction: Transaction) => {
-  if (!confirm('Are you sure you want to delete this transaction?')) {
-    return
-  }
+const deleteTransaction = (transaction: Transaction) => {
+  transactionToDelete.value = transaction
+  showConfirmModal.value = true
+}
+
+const confirmDelete = async () => {
+  const transaction = transactionToDelete.value
+  if (!transaction) return
 
   try {
     const response = await dashboardApi.deleteTransaction(transaction.id)
@@ -307,7 +327,14 @@ const deleteTransaction = async (transaction: Transaction) => {
   } catch (error) {
     console.error('Error deleting transaction:', error)
     alert('Error deleting transaction. Please try again.')
+  } finally {
+    closeConfirmModal()
   }
+}
+
+const closeConfirmModal = () => {
+  showConfirmModal.value = false
+  transactionToDelete.value = null
 }
 
 const closeModal = () => {
