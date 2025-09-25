@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
-import type { LoginRequest, LoginResponse, AuthenticatedRequest } from '../types'
+import type { LoginRequest, AuthenticatedRequest } from '../types'
 import { sessionService } from '../services/sessionService'
 
 export const login = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
