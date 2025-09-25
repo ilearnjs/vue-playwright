@@ -1,8 +1,8 @@
 ## Project structure
 
-### be - backend project. Stack: nodejs, fastify
+### be - backend project. Stack: nodejs, fastify + typescript
 
-### fe - frontend project. Stack: vue, vite, tailwindcss
+### fe - frontend project. Stack: vue + typescript, vite, tailwindcss
 
 ## Code style
 
