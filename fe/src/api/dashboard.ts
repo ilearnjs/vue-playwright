@@ -54,27 +54,38 @@ export interface DeleteTransactionResponse {
   error?: string
 }
 
-// Mock API configuration
-const API_CONFIG = {
-  timeout: 1000, // Simulate network delay
+// API configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+
+// HTTP client with credentials
+const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+  const url = `${API_BASE_URL}${endpoint}`
+
+  const response = await fetch(url, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  return response.json()
 }
 
-// Simulate network delay for realistic UX
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
-// Mock dashboard API calls
+// Dashboard API calls
 export const dashboardApi = {
   /**
-   * Mock get total balance API call
+   * Get total balance API call
    */
   async getTotalBalance(): Promise<BalanceResponse> {
     try {
-      await delay(600)
-
-      return {
-        success: true,
-        balance: 12450.30
-      }
+      const response = await makeRequest('/api/dashboard/balance')
+      return response
     } catch (error) {
       return {
         success: false,
@@ -84,17 +95,12 @@ export const dashboardApi = {
   },
 
   /**
-   * Mock get monthly data API call
+   * Get monthly data API call
    */
   async getMonthlyData(): Promise<MonthlyDataResponse> {
     try {
-      await delay(700)
-
-      return {
-        success: true,
-        income: 5250.00,
-        expenses: 2840.75
-      }
+      const response = await makeRequest('/api/dashboard/monthly-data')
+      return response
     } catch (error) {
       return {
         success: false,
@@ -104,40 +110,12 @@ export const dashboardApi = {
   },
 
   /**
-   * Mock get transaction history API call
+   * Get transaction history API call
    */
   async getHistory(): Promise<HistoryResponse> {
     try {
-      await delay(800)
-
-      const mockTransactions: Transaction[] = [
-        {
-          id: '1',
-          type: 'expense',
-          amount: 87.45,
-          date: 'Today',
-          timestamp: '2:30 PM'
-        },
-        {
-          id: '2',
-          type: 'income',
-          amount: 3250.00,
-          date: 'Yesterday',
-          timestamp: '9:00 AM'
-        },
-        {
-          id: '3',
-          type: 'expense',
-          amount: 120.50,
-          date: 'Dec 1',
-          timestamp: '4:15 PM'
-        }
-      ]
-
-      return {
-        success: true,
-        transactions: mockTransactions
-      }
+      const response = await makeRequest('/api/dashboard/transactions')
+      return response
     } catch (error) {
       return {
         success: false,
@@ -147,25 +125,16 @@ export const dashboardApi = {
   },
 
   /**
-   * Mock create transaction API call
+   * Create transaction API call
    */
   async createTransaction(data: CreateTransactionRequest): Promise<CreateTransactionResponse> {
     try {
-      await delay(1000)
+      const response = await makeRequest('/api/dashboard/transactions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      })
 
-      // Create new transaction with mock data
-      const newTransaction: Transaction = {
-        id: Math.random().toString(36).substr(2, 9),
-        type: data.type,
-        amount: data.amount,
-        date: 'Today',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-
-      return {
-        success: true,
-        transaction: newTransaction
-      }
+      return response
     } catch (error) {
       return {
         success: false,
@@ -175,25 +144,17 @@ export const dashboardApi = {
   },
 
   /**
-   * Mock update transaction API call
+   * Update transaction API call
    */
   async updateTransaction(data: UpdateTransactionRequest): Promise<UpdateTransactionResponse> {
     try {
-      await delay(800)
+      const { id, ...updateData } = data
+      const response = await makeRequest(`/api/dashboard/transactions/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updateData),
+      })
 
-      // Update transaction with mock data
-      const updatedTransaction: Transaction = {
-        id: data.id,
-        type: data.type,
-        amount: data.amount,
-        date: 'Today', // In real app, this would preserve original date or update it
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-
-      return {
-        success: true,
-        transaction: updatedTransaction
-      }
+      return response
     } catch (error) {
       return {
         success: false,
@@ -203,15 +164,15 @@ export const dashboardApi = {
   },
 
   /**
-   * Mock delete transaction API call
+   * Delete transaction API call
    */
   async deleteTransaction(id: string): Promise<DeleteTransactionResponse> {
     try {
-      await delay(500)
+      const response = await makeRequest(`/api/dashboard/transactions/${id}`, {
+        method: 'DELETE',
+      })
 
-      return {
-        success: true
-      }
+      return response
     } catch (error) {
       return {
         success: false,

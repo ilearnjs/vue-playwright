@@ -16,43 +16,42 @@ export interface LoginResponse {
   error?: string
 }
 
-// Mock API configuration
-const API_CONFIG = {
-  timeout: 1000, // Simulate network delay
+// API configuration
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+
+// HTTP client with credentials
+const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
+  const url = `${API_BASE_URL}${endpoint}`
+
+  const response = await fetch(url, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  })
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`)
+  }
+
+  return response.json()
 }
 
-// Simulate network delay for realistic UX
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
-// Mock authentication API calls
+// Authentication API calls
 export const authApi = {
   /**
-   * Mock sign in API call
-   * In production, this would make an HTTP request to the backend
+   * Sign in API call to backend
    */
   async signIn(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
-      // Simulate API delay
-      await delay(API_CONFIG.timeout)
+      const response = await makeRequest('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      })
 
-      // Mock validation - in real app this would be handled by backend
-      if (credentials.email === 'demo@example.com' && credentials.password === 'password') {
-        const user: User = {
-          id: '1',
-          email: credentials.email,
-          name: 'Demo User'
-        }
-
-        return {
-          success: true,
-          user
-        }
-      } else {
-        return {
-          success: false,
-          error: 'Invalid email or password'
-        }
-      }
+      return response
     } catch (error) {
       return {
         success: false,
@@ -62,48 +61,27 @@ export const authApi = {
   },
 
   /**
-   * Mock sign out API call
-   * In production, this would invalidate the session on the server
+   * Sign out API call to backend
    */
   async signOut(): Promise<{ success: boolean }> {
     try {
-      // Simulate API delay
-      await delay(500)
+      const response = await makeRequest('/api/auth/logout', {
+        method: 'POST',
+      })
 
-      // Mock successful sign out
-      return { success: true }
-    } catch {
+      return response
+    } catch (error) {
       return { success: false }
     }
   },
 
   /**
-   * Mock get current user API call
-   * In production, this would fetch user info from the server using session/token
+   * Get current user API call to backend
    */
   async getCurrentUser(email: string): Promise<LoginResponse> {
     try {
-      // Simulate API delay
-      await delay(800)
-
-      // Mock user lookup - in real app this would validate session and fetch user data
-      if (email === 'demo@example.com') {
-        const user: User = {
-          id: '1',
-          email: email,
-          name: 'Demo User'
-        }
-
-        return {
-          success: true,
-          user
-        }
-      } else {
-        return {
-          success: false,
-          error: 'User not found or session expired'
-        }
-      }
+      const response = await makeRequest('/api/auth/me')
+      return response
     } catch (error) {
       return {
         success: false,
