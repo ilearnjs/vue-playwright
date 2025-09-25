@@ -1,4 +1,3 @@
-// User types
 export interface User {
   id: string
   email: string
@@ -14,7 +13,6 @@ export interface UserResponse {
   name: string
 }
 
-// Auth types
 export interface LoginRequest {
   email: string
   password: string
@@ -26,7 +24,6 @@ export interface LoginResponse {
   error?: string
 }
 
-// Transaction types
 export interface Transaction {
   id: string
   userId: string
@@ -58,7 +55,6 @@ export interface UpdateTransactionRequest {
   description?: string
 }
 
-// API Response types
 export interface ApiResponse<T = any> {
   success: boolean
   data?: T
@@ -74,7 +70,6 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   }
 }
 
-// Fastify types
 export interface AuthenticatedRequest {
   user?: UserResponse
 }

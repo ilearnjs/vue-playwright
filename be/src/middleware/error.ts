@@ -6,16 +6,14 @@ export interface AppError extends Error {
   isOperational?: boolean
 }
 
-// Global error handler for Fastify
 export const errorHandler = async (
   error: FastifyError,
-  request: FastifyRequest,
+  _request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> => {
   const statusCode = error.statusCode || 500
   const message = error.message || 'Internal Server Error'
 
-  // Log error in development
   if (config.nodeEnv === 'development') {
     console.error('Error:', error)
   }
@@ -27,7 +25,6 @@ export const errorHandler = async (
   })
 }
 
-// 404 handler for Fastify
 export const notFoundHandler = async (
   request: FastifyRequest,
   reply: FastifyReply

@@ -24,11 +24,9 @@ const router = createRouter({
   ],
 })
 
-// Route guard for authentication
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
 
-  // Wait for auth initialization if it's still loading
   if (authStore.isLoading) {
     await new Promise<void>((resolve) => {
       const unwatch = authStore.$subscribe(() => {

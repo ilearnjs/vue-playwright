@@ -1,4 +1,3 @@
-// Dashboard-related types
 export interface Transaction {
   id: string
   type: 'income' | 'expense'
@@ -62,10 +61,8 @@ export interface DeleteTransactionResponse {
   error?: string
 }
 
-// API configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
 
-// HTTP client with credentials
 const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   const url = `${API_BASE_URL}${endpoint}`
 
@@ -85,11 +82,7 @@ const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise
   return response.json()
 }
 
-// Dashboard API calls
 export const dashboardApi = {
-  /**
-   * Get total balance API call
-   */
   async getTotalBalance(): Promise<BalanceResponse> {
     try {
       const response = await makeRequest('/api/dashboard/balance')
@@ -102,9 +95,6 @@ export const dashboardApi = {
     }
   },
 
-  /**
-   * Get monthly data API call
-   */
   async getMonthlyData(): Promise<MonthlyDataResponse> {
     try {
       const response = await makeRequest('/api/dashboard/monthly-data')
@@ -117,9 +107,6 @@ export const dashboardApi = {
     }
   },
 
-  /**
-   * Get transaction history API call
-   */
   async getHistory(): Promise<HistoryResponse> {
     try {
       const response = await makeRequest('/api/dashboard/transactions')
@@ -132,9 +119,6 @@ export const dashboardApi = {
     }
   },
 
-  /**
-   * Create transaction API call
-   */
   async createTransaction(data: CreateTransactionRequest): Promise<CreateTransactionResponse> {
     try {
       const response = await makeRequest('/api/dashboard/transactions', {
@@ -151,9 +135,6 @@ export const dashboardApi = {
     }
   },
 
-  /**
-   * Update transaction API call
-   */
   async updateTransaction(data: UpdateTransactionRequest): Promise<UpdateTransactionResponse> {
     try {
       const { id, ...updateData } = data
@@ -171,9 +152,6 @@ export const dashboardApi = {
     }
   },
 
-  /**
-   * Delete transaction API call
-   */
   async deleteTransaction(id: string): Promise<DeleteTransactionResponse> {
     try {
       const response = await makeRequest(`/api/dashboard/transactions/${id}`, {

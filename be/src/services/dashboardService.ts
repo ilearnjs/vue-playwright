@@ -1,11 +1,8 @@
 import type { Transaction, TransactionResponse, CreateTransactionRequest, UpdateTransactionRequest } from '../types'
 
-// Dashboard service class
 export class DashboardService {
-  // Get user balance service method
-  static async getUserBalance(userId: string): Promise<{ success: boolean; balance?: number; error?: string }> {
+  static async getUserBalance(_userId: string): Promise<{ success: boolean; balance?: number; error?: string }> {
     try {
-      // Implementation will go here
       return {
         success: false,
         error: 'Dashboard service getUserBalance - implementation pending'
@@ -18,10 +15,8 @@ export class DashboardService {
     }
   }
 
-  // Get monthly data service method
-  static async getMonthlyData(userId: string): Promise<{ success: boolean; income?: number; expenses?: number; error?: string }> {
+  static async getMonthlyData(_userId: string): Promise<{ success: boolean; income?: number; expenses?: number; error?: string }> {
     try {
-      // Implementation will go here
       return {
         success: false,
         error: 'Dashboard service getMonthlyData - implementation pending'
@@ -34,10 +29,8 @@ export class DashboardService {
     }
   }
 
-  // Get user transactions service method
-  static async getUserTransactions(userId: string): Promise<{ success: boolean; transactions?: TransactionResponse[]; error?: string }> {
+  static async getUserTransactions(_userId: string): Promise<{ success: boolean; transactions?: TransactionResponse[]; error?: string }> {
     try {
-      // Implementation will go here
       return {
         success: false,
         error: 'Dashboard service getUserTransactions - implementation pending'
@@ -50,10 +43,8 @@ export class DashboardService {
     }
   }
 
-  // Create transaction service method
-  static async createTransaction(userId: string, data: CreateTransactionRequest): Promise<{ success: boolean; transaction?: TransactionResponse; error?: string }> {
+  static async createTransaction(_userId: string, _data: CreateTransactionRequest): Promise<{ success: boolean; transaction?: TransactionResponse; error?: string }> {
     try {
-      // Implementation will go here
       return {
         success: false,
         error: 'Dashboard service createTransaction - implementation pending'
@@ -66,10 +57,8 @@ export class DashboardService {
     }
   }
 
-  // Update transaction service method
-  static async updateTransaction(userId: string, transactionId: string, data: UpdateTransactionRequest): Promise<{ success: boolean; transaction?: TransactionResponse; error?: string }> {
+  static async updateTransaction(_userId: string, _transactionId: string, _data: UpdateTransactionRequest): Promise<{ success: boolean; transaction?: TransactionResponse; error?: string }> {
     try {
-      // Implementation will go here
       return {
         success: false,
         error: 'Dashboard service updateTransaction - implementation pending'
@@ -82,10 +71,8 @@ export class DashboardService {
     }
   }
 
-  // Delete transaction service method
-  static async deleteTransaction(userId: string, transactionId: string): Promise<{ success: boolean; error?: string }> {
+  static async deleteTransaction(_userId: string, _transactionId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Implementation will go here
       return {
         success: false,
         error: 'Dashboard service deleteTransaction - implementation pending'

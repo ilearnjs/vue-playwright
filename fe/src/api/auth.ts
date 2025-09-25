@@ -1,4 +1,3 @@
-// Auth-related types
 export interface User {
   id: string
   email: string
@@ -16,10 +15,8 @@ export interface LoginResponse {
   error?: string
 }
 
-// API configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
 
-// HTTP client with credentials
 const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   const url = `${API_BASE_URL}${endpoint}`
 
@@ -39,11 +36,7 @@ const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise
   return response.json()
 }
 
-// Authentication API calls
 export const authApi = {
-  /**
-   * Sign in API call to backend
-   */
   async signIn(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
       const response = await makeRequest('/api/auth/login', {
@@ -60,9 +53,6 @@ export const authApi = {
     }
   },
 
-  /**
-   * Sign out API call to backend
-   */
   async signOut(): Promise<{ success: boolean }> {
     try {
       const response = await makeRequest('/api/auth/logout', {
@@ -75,10 +65,7 @@ export const authApi = {
     }
   },
 
-  /**
-   * Get current user API call to backend
-   */
-  async getCurrentUser(email: string): Promise<LoginResponse> {
+  async getCurrentUser(_email: string): Promise<LoginResponse> {
     try {
       const response = await makeRequest('/api/auth/me')
       return response

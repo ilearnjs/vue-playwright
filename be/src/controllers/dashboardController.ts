@@ -2,7 +2,6 @@ import { FastifyRequest, FastifyReply } from 'fastify'
 import type { AuthenticatedRequest, CreateTransactionRequest, UpdateTransactionRequest } from '../types'
 import { sessionService } from '../services/sessionService'
 
-// Mock transaction data
 const mockTransactions = [
   {
     id: '1',
@@ -38,13 +37,10 @@ const mockTransactions = [
   }
 ]
 
-// Get balance controller
 export const getBalance = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // User is set by auth middleware
     const user = request.user!
 
-    // Calculate total balance from mock transactions
     const userTransactions = mockTransactions.filter(t => t.userId === user.id)
     const totalBalance = userTransactions.reduce((sum, transaction) => {
       return transaction.type === 'income'
@@ -66,13 +62,10 @@ export const getBalance = async (request: FastifyRequest & AuthenticatedRequest,
   }
 }
 
-// Get monthly data controller
 export const getMonthlyData = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // User is set by auth middleware
     const user = request.user!
 
-    // Get current month transactions
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
@@ -110,13 +103,10 @@ export const getMonthlyData = async (request: FastifyRequest & AuthenticatedRequ
   }
 }
 
-// Get transactions controller
 export const getTransactions = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // User is set by auth middleware
     const user = request.user!
 
-    // Get user transactions sorted by date (newest first)
     const userTransactions = mockTransactions
       .filter(t => t.userId === user.id)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -133,10 +123,8 @@ export const getTransactions = async (request: FastifyRequest & AuthenticatedReq
   }
 }
 
-// Create transaction controller
 export const createTransaction = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // User is set by auth middleware
     const user = request.user!
     const { type, amount, description } = request.body as CreateTransactionRequest
 
@@ -184,10 +172,8 @@ export const createTransaction = async (request: FastifyRequest & AuthenticatedR
   }
 }
 
-// Update transaction controller
 export const updateTransaction = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // User is set by auth middleware
     const user = request.user!
     const { id } = request.params as { id: string }
     const { type, amount, description } = request.body as UpdateTransactionRequest
@@ -215,8 +201,7 @@ export const updateTransaction = async (request: FastifyRequest & AuthenticatedR
       })
     }
 
-    // Update the transaction
-    const transaction = mockTransactions[transactionIndex]
+    const transaction = mockTransactions[transactionIndex]!
     if (type) transaction.type = type
     if (amount) transaction.amount = amount
     if (description) transaction.description = description
@@ -233,10 +218,8 @@ export const updateTransaction = async (request: FastifyRequest & AuthenticatedR
   }
 }
 
-// Delete transaction controller
 export const deleteTransaction = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // User is set by auth middleware
     const user = request.user!
     const { id } = request.params as { id: string }
 
@@ -249,7 +232,6 @@ export const deleteTransaction = async (request: FastifyRequest & AuthenticatedR
       })
     }
 
-    // Remove the transaction
     const deletedTransaction = mockTransactions.splice(transactionIndex, 1)[0]
 
     reply.send({

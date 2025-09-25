@@ -2,12 +2,10 @@ import { FastifyRequest, FastifyReply } from 'fastify'
 import type { LoginRequest, LoginResponse, AuthenticatedRequest } from '../types'
 import { sessionService } from '../services/sessionService'
 
-// Login controller
 export const login = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   try {
     const { email, password } = request.body as LoginRequest
 
-    // Validate input
     if (!email || !password) {
       reply.status(400).send({
         success: false,
@@ -16,7 +14,6 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
       return
     }
 
-    // Authenticate user
     const userResponse = await sessionService.authenticateUser(email, password)
 
     if (!userResponse) {
@@ -27,7 +24,6 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
       return
     }
 
-    // Get full user data for session
     const user = sessionService.getUserByEmail(email)
     if (!user) {
       reply.status(500).send({
@@ -37,16 +33,13 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
       return
     }
 
-    // Create session
     const sessionId = sessionService.createSession(user)
 
-    // Set session cookie
     reply.setCookie('session_id', sessionId, {
       path: '/',
       httpOnly: true,
-      secure: false, // Set to true in production with HTTPS
-      // sameSite: 'lax', // Changed from 'strict' to 'lax' for cross-origin development
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000
     })
 
     reply.send({
@@ -61,17 +54,14 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
   }
 }
 
-// Logout controller
 export const logout = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   try {
     const sessionId = request.cookies.session_id
 
     if (sessionId) {
-      // Delete session from memory
       sessionService.deleteSession(sessionId)
     }
 
-    // Clear session cookie
     reply.clearCookie('session_id')
 
     reply.send({
@@ -85,7 +75,6 @@ export const logout = async (request: FastifyRequest, reply: FastifyReply): Prom
   }
 }
 
-// Get current user controller
 export const getCurrentUser = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
     const sessionId = request.cookies.session_id
@@ -98,7 +87,6 @@ export const getCurrentUser = async (request: FastifyRequest & AuthenticatedRequ
       return
     }
 
-    // Get user from session
     const user = sessionService.getUserBySession(sessionId)
 
     if (!user) {

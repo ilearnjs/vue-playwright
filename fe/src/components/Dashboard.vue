@@ -5,13 +5,11 @@
       <p class="text-gray-600 text-sm sm:text-base">Here's your financial overview for today.</p>
     </div>
 
-    <!-- Loading state -->
     <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <BalanceCardSkeleton />
       <MonthlyChangeCardSkeleton />
     </div>
 
-    <!-- Data loaded -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
       <BalanceCard :balance="balance" />
       <MonthlyChangeCard :monthly-income="monthlyIncome" :monthly-expenses="monthlyExpenses" />
@@ -42,12 +40,10 @@
         </div>
       </div>
 
-      <!-- Transactions loading state -->
       <div v-if="isLoading" class="space-y-2 sm:space-y-3">
         <TransactionItemSkeleton v-for="i in 3" :key="i" />
       </div>
 
-      <!-- Transactions loaded -->
       <div v-else class="space-y-2 sm:space-y-3">
         <TransactionItem
           v-for="transaction in transactions"
@@ -59,7 +55,6 @@
       </div>
     </div>
 
-    <!-- Transaction Modal -->
     <TransactionModal
       :is-open="showModal"
       :type="modalType"
@@ -68,7 +63,6 @@
       @submit="handleTransactionSubmit"
     />
 
-    <!-- Confirmation Modal -->
     <ConfirmationModal
       :is-open="showConfirmModal"
       title="Delete Transaction"
@@ -103,12 +97,10 @@ const monthlyExpenses = ref<number | null>(null)
 const transactions = ref<Transaction[]>([])
 
 
-// Modal state
 const showModal = ref(false)
 const modalType = ref<'income' | 'expense'>('income')
 const editingTransaction = ref<Transaction | null>(null)
 
-// Confirmation modal state
 const showConfirmModal = ref(false)
 const transactionToDelete = ref<Transaction | null>(null)
 
@@ -116,7 +108,6 @@ const loadDashboardData = async () => {
   isLoading.value = true
 
   try {
-    // Load all dashboard data in parallel
     const [balanceResponse, monthlyDataResponse, historyResponse] = await Promise.all([
       dashboardApi.getTotalBalance(),
       dashboardApi.getMonthlyData(),
@@ -136,7 +127,6 @@ const loadDashboardData = async () => {
       transactions.value = historyResponse.data || []
     }
   } catch (error) {
-    console.error('Failed to load dashboard data:', error)
   } finally {
     isLoading.value = false
   }
@@ -173,12 +163,10 @@ const confirmDelete = async () => {
     const response = await dashboardApi.deleteTransaction(transaction.id)
 
     if (response.success) {
-      // Remove transaction from list
       const index = transactions.value.findIndex(t => t.id === transaction.id)
       if (index !== -1) {
         transactions.value.splice(index, 1)
 
-        // Update balance and monthly data
         if (transaction.type === 'income') {
           balance.value = (balance.value || 0) - transaction.amount
           monthlyIncome.value = (monthlyIncome.value || 0) - transaction.amount
@@ -188,11 +176,9 @@ const confirmDelete = async () => {
         }
       }
     } else {
-      console.error('Failed to delete transaction:', response.error)
       alert('Failed to delete transaction. Please try again.')
     }
   } catch (error) {
-    console.error('Error deleting transaction:', error)
     alert('Error deleting transaction. Please try again.')
   } finally {
     closeConfirmModal()
@@ -212,7 +198,6 @@ const closeModal = () => {
 const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: string }) => {
   try {
     if (data.id) {
-      // Edit existing transaction
       const updateData: UpdateTransactionRequest = {
         id: data.id,
         type: data.type,
@@ -222,12 +207,10 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
       const response = await dashboardApi.updateTransaction(updateData)
 
       if (response.success && response.data) {
-        // Find and update transaction in list
         const index = transactions.value.findIndex(t => t.id === data.id)
         if (index !== -1) {
           const oldTransaction = transactions.value[index]
 
-          // Reverse old transaction effect on balance and monthly data
           if (oldTransaction.type === 'income') {
             balance.value = (balance.value || 0) - oldTransaction.amount
             monthlyIncome.value = (monthlyIncome.value || 0) - oldTransaction.amount
@@ -236,7 +219,6 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
             monthlyExpenses.value = (monthlyExpenses.value || 0) - oldTransaction.amount
           }
 
-          // Apply new transaction effect
           if (data.type === 'income') {
             balance.value = (balance.value || 0) + data.amount
             monthlyIncome.value = (monthlyIncome.value || 0) + data.amount
@@ -245,23 +227,18 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
             monthlyExpenses.value = (monthlyExpenses.value || 0) + data.amount
           }
 
-          // Update transaction in list
           transactions.value[index] = response.data
         }
 
         closeModal()
       } else {
-        console.error('Failed to update transaction:', response.error)
       }
     } else {
-      // Create new transaction
       const response = await dashboardApi.createTransaction(data)
 
       if (response.success && response.data) {
-        // Add new transaction to the beginning of the list
         transactions.value.unshift(response.data)
 
-        // Update balance and monthly data
         if (data.type === 'income') {
           balance.value = (balance.value || 0) + data.amount
           monthlyIncome.value = (monthlyIncome.value || 0) + data.amount
@@ -272,11 +249,9 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
 
         closeModal()
       } else {
-        console.error('Failed to create transaction:', response.error)
       }
     }
   } catch (error) {
-    console.error('Error saving transaction:', error)
   }
 }
 
