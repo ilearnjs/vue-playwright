@@ -3,49 +3,57 @@ export interface Transaction {
   id: string
   type: 'income' | 'expense'
   amount: number
+  description: string
   date: string
-  timestamp: string
+  userId: string
 }
 
 export interface BalanceResponse {
   success: boolean
-  balance?: number
+  data?: {
+    balance: number
+  }
   error?: string
 }
 
 export interface MonthlyDataResponse {
   success: boolean
-  income?: number
-  expenses?: number
+  data?: {
+    change: number
+    income: number
+    expenses: number
+  }
   error?: string
 }
 
 export interface HistoryResponse {
   success: boolean
-  transactions?: Transaction[]
+  data?: Transaction[]
   error?: string
 }
 
 export interface CreateTransactionRequest {
   type: 'income' | 'expense'
   amount: number
+  description: string
 }
 
 export interface CreateTransactionResponse {
   success: boolean
-  transaction?: Transaction
+  data?: Transaction
   error?: string
 }
 
 export interface UpdateTransactionRequest {
   id: string
-  type: 'income' | 'expense'
-  amount: number
+  type?: 'income' | 'expense'
+  amount?: number
+  description?: string
 }
 
 export interface UpdateTransactionResponse {
   success: boolean
-  transaction?: Transaction
+  data?: Transaction
   error?: string
 }
 

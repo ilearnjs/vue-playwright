@@ -123,17 +123,17 @@ const loadDashboardData = async () => {
       dashboardApi.getHistory()
     ])
 
-    if (balanceResponse.success) {
-      balance.value = balanceResponse.balance || 0
+    if (balanceResponse.success && balanceResponse.data) {
+      balance.value = balanceResponse.data.balance || 0
     }
 
-    if (monthlyDataResponse.success) {
-      monthlyIncome.value = monthlyDataResponse.income || 0
-      monthlyExpenses.value = monthlyDataResponse.expenses || 0
+    if (monthlyDataResponse.success && monthlyDataResponse.data) {
+      monthlyIncome.value = monthlyDataResponse.data.income || 0
+      monthlyExpenses.value = monthlyDataResponse.data.expenses || 0
     }
 
-    if (historyResponse.success) {
-      transactions.value = historyResponse.transactions || []
+    if (historyResponse.success && historyResponse.data) {
+      transactions.value = historyResponse.data || []
     }
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
@@ -216,11 +216,12 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
       const updateData: UpdateTransactionRequest = {
         id: data.id,
         type: data.type,
-        amount: data.amount
+        amount: data.amount,
+        description: data.description
       }
       const response = await dashboardApi.updateTransaction(updateData)
 
-      if (response.success && response.transaction) {
+      if (response.success && response.data) {
         // Find and update transaction in list
         const index = transactions.value.findIndex(t => t.id === data.id)
         if (index !== -1) {
@@ -245,7 +246,7 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
           }
 
           // Update transaction in list
-          transactions.value[index] = response.transaction
+          transactions.value[index] = response.data
         }
 
         closeModal()
@@ -256,9 +257,9 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
       // Create new transaction
       const response = await dashboardApi.createTransaction(data)
 
-      if (response.success && response.transaction) {
+      if (response.success && response.data) {
         // Add new transaction to the beginning of the list
-        transactions.value.unshift(response.transaction)
+        transactions.value.unshift(response.data)
 
         // Update balance and monthly data
         if (data.type === 'income') {

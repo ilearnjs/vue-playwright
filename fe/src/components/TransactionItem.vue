@@ -18,8 +18,8 @@
         </svg>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="font-medium text-gray-900 text-sm sm:text-base">{{ transaction.type === 'income' ? 'Income' : 'Expense' }}</p>
-        <p class="text-xs sm:text-sm text-gray-500 truncate">{{ transaction.date }}, {{ transaction.timestamp }}</p>
+        <p class="font-medium text-gray-900 text-sm sm:text-base">{{ transaction.description }}</p>
+        <p class="text-xs sm:text-sm text-gray-500 truncate">{{ new Date(transaction.date).toLocaleDateString() }}</p>
       </div>
     </div>
 

@@ -1,40 +1,34 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify'
+import {
+  getBalance,
+  getMonthlyData,
+  getTransactions,
+  createTransaction,
+  updateTransaction,
+  deleteTransaction
+} from '../controllers/dashboardController'
+import { requireAuth } from '../middleware/auth'
 
 // Dashboard routes plugin
 export async function dashboardRoutes(fastify: FastifyInstance, options: FastifyPluginOptions) {
+  // Apply auth middleware to all dashboard routes
+  fastify.addHook('preHandler', requireAuth)
+
   // GET /api/dashboard/balance
-  fastify.get('/balance', async (request, reply) => {
-    // Implementation will go here
-    return { message: 'Get balance endpoint - implementation pending' }
-  })
+  fastify.get('/balance', getBalance)
 
   // GET /api/dashboard/monthly-data
-  fastify.get('/monthly-data', async (request, reply) => {
-    // Implementation will go here
-    return { message: 'Get monthly data endpoint - implementation pending' }
-  })
+  fastify.get('/monthly-data', getMonthlyData)
 
   // GET /api/dashboard/transactions
-  fastify.get('/transactions', async (request, reply) => {
-    // Implementation will go here
-    return { message: 'Get transactions endpoint - implementation pending' }
-  })
+  fastify.get('/transactions', getTransactions)
 
   // POST /api/dashboard/transactions
-  fastify.post('/transactions', async (request, reply) => {
-    // Implementation will go here
-    return { message: 'Create transaction endpoint - implementation pending' }
-  })
+  fastify.post('/transactions', createTransaction)
 
   // PUT /api/dashboard/transactions/:id
-  fastify.put('/transactions/:id', async (request, reply) => {
-    // Implementation will go here
-    return { message: 'Update transaction endpoint - implementation pending' }
-  })
+  fastify.put('/transactions/:id', updateTransaction)
 
   // DELETE /api/dashboard/transactions/:id
-  fastify.delete('/transactions/:id', async (request, reply) => {
-    // Implementation will go here
-    return { message: 'Delete transaction endpoint - implementation pending' }
-  })
+  fastify.delete('/transactions/:id', deleteTransaction)
 }

@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!user.value)
 
   // Cookie configuration
-  const COOKIE_NAME = 'auth_user'
+  const SESSION_COOKIE_NAME = 'session_id'
   const COOKIE_OPTIONS = {
     expires: 7, // 7 days
     secure: location.protocol === 'https:', // Only send over HTTPS in production
@@ -31,7 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = response.user
 
         // Store in cookie for persistence
-        Cookies.set(COOKIE_NAME, JSON.stringify(user.value), COOKIE_OPTIONS)
+        // Cookies.set(SESSION_COOKIE_NAME, JSON.stringify(user.value), COOKIE_OPTIONS)
 
         return true
       } else {
@@ -57,12 +57,12 @@ export const useAuthStore = defineStore('auth', () => {
     // Clear local state and cookie
     user.value = null
     error.value = null
-    Cookies.remove(COOKIE_NAME, { path: '/' })
+    Cookies.remove(SESSION_COOKIE_NAME, { path: '/' })
   }
 
   // Initialize user from API verification on app start
   const initializeAuth = async () => {
-    const storedUser = Cookies.get(COOKIE_NAME)
+    const storedUser = Cookies.get(SESSION_COOKIE_NAME)
     if (!storedUser) {
       return // No stored user, remain unauthenticated
     }
@@ -82,14 +82,14 @@ export const useAuthStore = defineStore('auth', () => {
         // Update user with fresh data from API
         user.value = response.user
         // Update cookie with fresh data
-        Cookies.set(COOKIE_NAME, JSON.stringify(response.user), COOKIE_OPTIONS)
+        Cookies.set(SESSION_COOKIE_NAME, JSON.stringify(response.user), COOKIE_OPTIONS)
       } else {
         // Session invalid, clear local data
         throw new Error(response.error || 'Session expired')
       }
     } catch (err) {
       // Clear invalid cookie and local state
-      Cookies.remove(COOKIE_NAME, { path: '/' })
+      Cookies.remove(SESSION_COOKIE_NAME, { path: '/' })
       user.value = null
       // Don't set error state during initialization - just fail silently
       console.warn('Authentication initialization failed:', err instanceof Error ? err.message : 'Unknown error')

@@ -42,9 +42,10 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
 
     // Set session cookie
     reply.setCookie('session_id', sessionId, {
+      path: '/',
       httpOnly: true,
       secure: false, // Set to true in production with HTTPS
-      sameSite: 'strict',
+      // sameSite: 'lax', // Changed from 'strict' to 'lax' for cross-origin development
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     })
 

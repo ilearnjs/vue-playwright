@@ -14,10 +14,10 @@ const start = async () => {
     })
 
     await fastify.register(import('@fastify/cors'), {
-      origin: true,
+      origin: ['http://localhost:5173', 'http://localhost:5174'], // Frontend origins
       credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization']
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
     })
 
     await fastify.register(import('@fastify/cookie'), {
@@ -35,7 +35,7 @@ const start = async () => {
 
     // Register API routes
     await fastify.register((await import('./routes/auth')).authRoutes, { prefix: '/api/auth' })
-    // await fastify.register(dashboardRoutes, { prefix: '/api/dashboard' })
+    await fastify.register((await import('./routes/dashboard')).dashboardRoutes, { prefix: '/api/dashboard' })
 
     // Start server
     await fastify.listen({

@@ -33,6 +33,21 @@
       <!-- Form -->
       <form @submit.prevent="handleSubmit">
         <div class="mb-4 sm:mb-4">
+          <label for="description" class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+            Description
+          </label>
+          <input
+            id="description"
+            v-model="description"
+            type="text"
+            required
+            :disabled="isLoading"
+            class="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed text-base sm:text-sm"
+            placeholder="Enter description"
+          />
+        </div>
+
+        <div class="mb-4 sm:mb-4">
           <label for="amount" class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Amount ($)
           </label>
@@ -61,7 +76,7 @@
           </button>
           <button
             type="submit"
-            :disabled="isLoading || !amount || Number(amount) <= 0"
+            :disabled="isLoading || !amount || Number(amount) <= 0 || !description"
             :class="[
               'px-4 py-2.5 sm:py-2 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center text-sm',
               isEdit
@@ -96,8 +111,9 @@ interface Transaction {
   id: string
   type: 'income' | 'expense'
   amount: number
+  description: string
   date: string
-  timestamp: string
+  userId: string
 }
 
 interface Props {
@@ -108,13 +124,14 @@ interface Props {
 
 interface Emits {
   (e: 'close'): void
-  (e: 'submit', data: { type: 'income' | 'expense'; amount: number; id?: string }): void
+  (e: 'submit', data: { type: 'income' | 'expense'; amount: number; description: string; id?: string }): void
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const amount = ref('')
+const description = ref('')
 const isLoading = ref(false)
 const error = ref('')
 
@@ -130,6 +147,11 @@ const handleSubmit = async () => {
     return
   }
 
+  if (!description.value.trim()) {
+    error.value = 'Please enter a description'
+    return
+  }
+
   error.value = ''
   isLoading.value = true
 
@@ -137,6 +159,7 @@ const handleSubmit = async () => {
     emit('submit', {
       type: props.type,
       amount: Number(amount.value),
+      description: description.value.trim(),
       id: props.transaction?.id
     })
   } catch (err) {
@@ -153,9 +176,11 @@ watch(() => props.isOpen, (newValue) => {
     if (props.transaction) {
       // Edit mode - populate with existing data
       amount.value = props.transaction.amount.toString()
+      description.value = props.transaction.description
     } else {
       // Add mode - reset form
       amount.value = ''
+      description.value = ''
     }
     error.value = ''
     isLoading.value = false
