@@ -7,27 +7,27 @@
 
     <!-- Loading state -->
     <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-          <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-4">
-            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 h-24 sm:h-32">
+        <div class="flex items-center h-full">
+          <div class="w-10 sm:w-14 h-10 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+            <div class="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-gray-400"></div>
           </div>
           <div>
-            <p class="text-sm text-gray-600">Total Balance</p>
-            <div class="h-8 bg-gray-200 rounded animate-pulse mt-1"></div>
+            <p class="text-xs sm:text-sm text-gray-600">Total Balance</p>
+            <div class="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 w-24 sm:w-32"></div>
           </div>
         </div>
       </div>
 
-      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-          <div class="w-10 sm:w-12 h-10 sm:h-12 bg-gray-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 h-24 sm:h-32">
+        <div class="flex items-center h-full">
+          <div class="w-10 sm:w-14 h-10 sm:h-14 bg-gray-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0">
             <div class="animate-spin rounded-full h-5 sm:h-6 w-5 sm:w-6 border-b-2 border-gray-400"></div>
           </div>
-          <div class="flex-1">
-            <p class="text-sm text-gray-600">This Month's Change</p>
-            <div class="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 mb-2"></div>
-            <div class="flex justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs sm:text-sm text-gray-600">This Month's Change</p>
+            <div class="h-5 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 mb-1 sm:mb-2 w-20 sm:w-28"></div>
+            <div class="flex justify-between text-xs sm:text-sm">
               <div class="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
               <div class="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
             </div>
@@ -38,9 +38,9 @@
 
     <!-- Data loaded -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
-          <div class="w-10 sm:w-12 h-10 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 h-24 sm:h-32">
+        <div class="flex items-center h-full">
+          <div class="w-10 sm:w-14 h-10 sm:h-14 bg-green-100 rounded-lg flex items-center justify-center mr-3 sm:mr-4">
             <svg class="w-5 sm:w-6 h-5 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
             </svg>
@@ -52,10 +52,10 @@
         </div>
       </div>
 
-      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
-        <div class="flex items-center">
+      <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 h-24 sm:h-32">
+        <div class="flex items-center h-full">
           <div :class="[
-            'w-10 sm:w-12 h-10 sm:h-12 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0',
+            'w-10 sm:w-14 h-10 sm:h-14 rounded-lg flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0',
             (monthlyChange || 0) >= 0 ? 'bg-blue-100' : 'bg-orange-100'
           ]">
             <svg :class="[
@@ -118,18 +118,24 @@
       </div>
 
       <!-- Transactions loading state -->
-      <div v-if="isLoading" class="space-y-3">
-        <div v-for="i in 3" :key="i" class="flex items-center justify-between py-2">
-          <div class="flex items-center">
-            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
-              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
+      <div v-if="isLoading" class="space-y-2 sm:space-y-3">
+        <div v-for="i in 3" :key="i" class="flex items-center justify-between py-2 sm:py-3 px-1 sm:px-2 rounded-lg">
+          <div class="flex items-center flex-1 min-w-0">
+            <div class="w-8 sm:w-10 h-8 sm:h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+              <div class="animate-spin rounded-full h-4 sm:h-5 w-4 sm:w-5 border-b-2 border-gray-400"></div>
             </div>
-            <div>
-              <div class="h-4 bg-gray-200 rounded animate-pulse mb-1 w-20"></div>
-              <div class="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+            <div class="flex-1 min-w-0">
+              <div class="h-4 sm:h-5 bg-gray-200 rounded animate-pulse mb-1 w-16 sm:w-20"></div>
+              <div class="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-20 sm:w-24"></div>
             </div>
           </div>
-          <div class="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+          <div class="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
+            <div class="h-4 sm:h-5 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
+            <div class="flex items-center space-x-1 sm:space-x-2">
+              <div class="w-6 sm:w-8 h-6 sm:h-8 bg-gray-100 rounded"></div>
+              <div class="w-6 sm:w-8 h-6 sm:h-8 bg-gray-100 rounded"></div>
+            </div>
+          </div>
         </div>
       </div>
 
