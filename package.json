@@ -1,0 +1,36 @@
+{
+  "name": "finance-tracker-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Finance Tracker - Full Stack Application",
+  "scripts": {
+    "install:all": "cd fe && yarn install && cd ../be && yarn install",
+    "build": "cd fe && yarn build && cd ../be && yarn build",
+    "dev": "concurrently \"cd fe && yarn dev\" \"cd be && yarn dev\"",
+    "dev:fe": "cd fe && yarn dev",
+    "dev:be": "cd be && yarn dev",
+    "build:fe": "cd fe && yarn build",
+    "build:be": "cd be && yarn build",
+    "start": "concurrently \"cd fe && yarn start\" \"cd be && yarn start\"",
+    "start:fe": "cd fe && yarn start",
+    "start:be": "cd be && yarn start",
+    "type-check": "cd fe && yarn type-check && cd ../be && yarn type-check"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "yarn": ">=1.22.0"
+  },
+  "keywords": [
+    "finance",
+    "tracker",
+    "vue",
+    "fastify",
+    "typescript",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC"
+}

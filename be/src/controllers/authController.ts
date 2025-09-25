@@ -1,13 +1,56 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import type { LoginRequest, LoginResponse, AuthenticatedRequest } from '../types'
+import { sessionService } from '../services/sessionService'
 
 // Login controller
 export const login = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // Implementation will go here
+    const { email, password } = request.body as LoginRequest
+
+    // Validate input
+    if (!email || !password) {
+      reply.status(400).send({
+        success: false,
+        error: 'Email and password are required'
+      })
+      return
+    }
+
+    // Authenticate user
+    const userResponse = await sessionService.authenticateUser(email, password)
+
+    if (!userResponse) {
+      reply.status(401).send({
+        success: false,
+        error: 'Invalid email or password'
+      })
+      return
+    }
+
+    // Get full user data for session
+    const user = sessionService.getUserByEmail(email)
+    if (!user) {
+      reply.status(500).send({
+        success: false,
+        error: 'User data not found'
+      })
+      return
+    }
+
+    // Create session
+    const sessionId = sessionService.createSession(user)
+
+    // Set session cookie
+    reply.setCookie('session_id', sessionId, {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    })
+
     reply.send({
-      success: false,
-      error: 'Login controller - implementation pending'
+      success: true,
+      user: userResponse
     })
   } catch (error) {
     reply.status(500).send({
@@ -20,10 +63,18 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
 // Logout controller
 export const logout = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // Implementation will go here
+    const sessionId = request.cookies.session_id
+
+    if (sessionId) {
+      // Delete session from memory
+      sessionService.deleteSession(sessionId)
+    }
+
+    // Clear session cookie
+    reply.clearCookie('session_id')
+
     reply.send({
-      success: false,
-      error: 'Logout controller - implementation pending'
+      success: true
     })
   } catch (error) {
     reply.status(500).send({
@@ -36,10 +87,30 @@ export const logout = async (request: FastifyRequest, reply: FastifyReply): Prom
 // Get current user controller
 export const getCurrentUser = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
-    // Implementation will go here
+    const sessionId = request.cookies.session_id
+
+    if (!sessionId) {
+      reply.status(401).send({
+        success: false,
+        error: 'No session found'
+      })
+      return
+    }
+
+    // Get user from session
+    const user = sessionService.getUserBySession(sessionId)
+
+    if (!user) {
+      reply.status(401).send({
+        success: false,
+        error: 'Invalid or expired session'
+      })
+      return
+    }
+
     reply.send({
-      success: false,
-      error: 'Get current user controller - implementation pending'
+      success: true,
+      user
     })
   } catch (error) {
     reply.status(500).send({

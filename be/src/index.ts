@@ -33,8 +33,8 @@ const start = async () => {
       }
     })
 
-    // API routes will go here
-    // await fastify.register(authRoutes, { prefix: '/api/auth' })
+    // Register API routes
+    await fastify.register((await import('./routes/auth')).authRoutes, { prefix: '/api/auth' })
     // await fastify.register(dashboardRoutes, { prefix: '/api/dashboard' })
 
     // Start server

@@ -1,20 +1,54 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import type { AuthenticatedRequest } from '../types'
+import { sessionService } from '../services/sessionService'
 
-// Authentication hook - implementation pending
-export const authenticateToken = async (
-  request: FastifyRequest,
+// Authentication middleware - validates session and adds user to request
+export const authenticateSession = async (
+  request: FastifyRequest & AuthenticatedRequest,
   reply: FastifyReply
 ): Promise<void> => {
-  // Implementation will go here
-  console.log('Authentication hook - implementation pending')
+  const sessionId = request.cookies.session_id
+
+  if (!sessionId) {
+    return // No session, continue without authentication
+  }
+
+  // Get user from session
+  const user = sessionService.getUserBySession(sessionId)
+
+  if (user) {
+    // Add user to request object
+    request.user = user
+  }
+  // If session is invalid, just continue without user (don't throw error)
 }
 
-// Authorization hook - implementation pending
+// Authorization middleware - requires authentication
 export const requireAuth = async (
   request: FastifyRequest & AuthenticatedRequest,
   reply: FastifyReply
 ): Promise<void> => {
-  // Implementation will go here
-  console.log('Authorization hook - implementation pending')
+  const sessionId = request.cookies.session_id
+
+  if (!sessionId) {
+    reply.status(401).send({
+      success: false,
+      error: 'Authentication required'
+    })
+    return
+  }
+
+  // Get user from session
+  const user = sessionService.getUserBySession(sessionId)
+
+  if (!user) {
+    reply.status(401).send({
+      success: false,
+      error: 'Invalid or expired session'
+    })
+    return
+  }
+
+  // Add user to request object
+  request.user = user
 }

@@ -4,6 +4,9 @@
 
 ### fe - frontend project. Stack: vue + typescript, vite, tailwindcss
 
+## Package management
+- yarn workspaces
+
 ## Code style
 
 ### Vue
@@ -15,3 +18,7 @@
   - template
   - script
   - style
+
+### Fastify
+- use single quote
+- use async/await

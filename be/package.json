@@ -1,5 +1,5 @@
 {
-  "name": "finance-tracker-backend",
+  "name": "be",
   "version": "1.0.0",
   "description": "Backend API for Finance Tracker application",
   "main": "dist/index.js",
