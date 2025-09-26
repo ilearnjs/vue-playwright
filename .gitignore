@@ -4,3 +4,7 @@ yarn.lock
 *.log
 dist/
 be/dist/
+
+# Playwright test artifacts
+fe/playwright-report/
+fe/test-results/
