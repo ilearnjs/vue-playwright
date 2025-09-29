@@ -17,7 +17,8 @@ test.describe('Auth Page Visual Tests', () => {
 
     await page.getByTestId('email-input').fill('user@example.com')
     await page.getByTestId('password-input').fill('password')
-    
+    await page.getByTestId('remember-me-checkbox').check()
+
     await expect(page).toHaveScreenshot('auth-page-after-submit.png', {
       fullPage: true,
       animations: 'disabled',

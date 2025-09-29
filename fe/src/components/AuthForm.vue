@@ -74,6 +74,7 @@
               id="remember-me"
               type="checkbox"
               :disabled="authStore.isLoading"
+              data-testid="remember-me-checkbox"
               class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded disabled:cursor-not-allowed"
             />
             <label for="remember-me" class="ml-2 block text-xs sm:text-sm text-gray-900">
