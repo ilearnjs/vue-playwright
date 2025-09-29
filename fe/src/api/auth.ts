@@ -20,17 +20,25 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
 const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   const url = `${API_BASE_URL}${endpoint}`
 
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string>),
+  }
+
+  // Only set Content-Type if there's a body
+  if (options.body) {
+    headers['Content-Type'] = 'application/json'
+  }
+
   const response = await fetch(url, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers,
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    const error = new Error(`HTTP error! status: ${response.status}`) as any
+    error.status = response.status
+    throw error
   }
 
   return response.json()
@@ -65,11 +73,17 @@ export const authApi = {
     }
   },
 
-  async getCurrentUser(_email: string): Promise<LoginResponse> {
+  async getCurrentUser(): Promise<LoginResponse> {
     try {
       const response = await makeRequest('/api/auth/me')
       return response
-    } catch (error) {
+    } catch (error: any) {
+      // Don't treat 401 as an error - it just means no valid session
+      if (error.status === 401) {
+        return {
+          success: false,
+        }
+      }
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get current user'

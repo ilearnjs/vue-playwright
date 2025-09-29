@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import Cookies from 'js-cookie'
 import { authApi, type User, type LoginCredentials } from '@/api'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -10,13 +9,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!user.value)
 
-  const SESSION_COOKIE_NAME = 'session_id'
-  const COOKIE_OPTIONS = {
-    expires: 7,
-    secure: location.protocol === 'https:',
-    sameSite: 'strict' as const,
-    path: '/'
-  }
 
   const signIn = async (credentials: LoginCredentials): Promise<boolean> => {
     isLoading.value = true
@@ -27,8 +19,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (response.success && response.user) {
         user.value = response.user
-
-
         return true
       } else {
         error.value = response.error || 'Sign in failed'
@@ -46,36 +36,22 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authApi.signOut()
     } catch {
+      // Even if the API call fails, clear the local state
     }
 
     user.value = null
     error.value = null
-    Cookies.remove(SESSION_COOKIE_NAME, { path: '/' })
   }
 
   const initializeAuth = async () => {
-    const storedUser = Cookies.get(SESSION_COOKIE_NAME)
-    if (!storedUser) {
-      return
-    }
-
+    isLoading.value = true
     try {
-      const userData = JSON.parse(storedUser)
-      if (!userData.email) {
-        throw new Error('No email in stored user data')
-      }
-
-      isLoading.value = true
-      const response = await authApi.getCurrentUser(userData.email)
+      const response = await authApi.getCurrentUser()
 
       if (response.success && response.user) {
         user.value = response.user
-        Cookies.set(SESSION_COOKIE_NAME, JSON.stringify(response.user), COOKIE_OPTIONS)
-      } else {
-        throw new Error(response.error || 'Session expired')
       }
     } catch (err) {
-      Cookies.remove(SESSION_COOKIE_NAME, { path: '/' })
       user.value = null
     } finally {
       isLoading.value = false
