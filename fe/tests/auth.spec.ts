@@ -1,7 +1,7 @@
 import { test, expect } from './_setup'
 
 test.describe('Auth Page Visual Tests', () => {
-  test('should match visual snapshot init', async ({ page }) => {
+  test('init state', async ({ page }) => {
     await page.goto('/auth')
     await page.waitForLoadState('networkidle')
 
@@ -11,7 +11,7 @@ test.describe('Auth Page Visual Tests', () => {
     })
   })
 
-  test('should match visual snapshot after form filled', async ({ page }) => {
+  test('form filled', async ({ page }) => {
     await page.goto('/auth')
     await page.waitForLoadState('networkidle')
 

@@ -1,7 +1,7 @@
 import { test, expect } from './_setup'
 
 test.describe('About Page Visual Tests', () => {
-  test('should match visual snapshot on init', async ({ page }) => {
+  test('init state', async ({ page }) => {
     await page.goto('/about')
     await page.waitForLoadState('networkidle')
 

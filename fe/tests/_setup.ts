@@ -1,6 +1,17 @@
 import { test as base, expect } from '@playwright/test'
 
-export const test = base.extend({
+type AuthFixture = {
+  auth: () => Promise<void>;
+};
+
+export const test = base.extend<AuthFixture>({
+  auth: async ({ context }, use) => {
+    await use(async () => {
+      await context.addCookies([
+        { name: 'session_id', value: '123', path: '/', domain: 'localhost' }
+      ]);
+    })
+  },
 })
 
 export { expect }
