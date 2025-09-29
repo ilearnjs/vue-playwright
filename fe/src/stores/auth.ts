@@ -10,23 +10,16 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!user.value)
 
 
-  const signIn = async (credentials: LoginCredentials): Promise<boolean> => {
+  const signIn = async (credentials: LoginCredentials): Promise<void> => {
     isLoading.value = true
     error.value = null
 
     try {
-      const response = await authApi.signIn(credentials)
-
-      if (response.success && response.user) {
-        user.value = response.user
-        return true
-      } else {
-        error.value = response.error || 'Sign in failed'
-        return false
-      }
+      const userData = await authApi.signIn(credentials)
+      user.value = userData
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Sign in failed'
-      return false
+      throw err
     } finally {
       isLoading.value = false
     }
@@ -37,20 +30,17 @@ export const useAuthStore = defineStore('auth', () => {
       await authApi.signOut()
     } catch {
       // Even if the API call fails, clear the local state
+    } finally {
+      user.value = null
+      error.value = null
     }
-
-    user.value = null
-    error.value = null
   }
 
   const initializeAuth = async () => {
     isLoading.value = true
     try {
-      const response = await authApi.getCurrentUser()
-
-      if (response.success && response.user) {
-        user.value = response.user
-      }
+      const userData = await authApi.getCurrentUser()
+      user.value = userData
     } catch (err) {
       user.value = null
     } finally {

@@ -9,12 +9,6 @@ export interface LoginCredentials {
   password: string
 }
 
-export interface LoginResponse {
-  success: boolean
-  user?: User
-  error?: string
-}
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
 
 const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
@@ -36,7 +30,7 @@ const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise
   })
 
   if (!response.ok) {
-    const error = new Error(`HTTP error! status: ${response.status}`) as any
+    const error = new Error(`HTTP error! status: ${response.status}`) as Error & { status: number }
     error.status = response.status
     throw error
   }
@@ -45,49 +39,31 @@ const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise
 }
 
 export const authApi = {
-  async signIn(credentials: LoginCredentials): Promise<LoginResponse> {
-    try {
-      const response = await makeRequest('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(credentials),
-      })
+  async signIn(credentials: LoginCredentials): Promise<User> {
+    const response = await makeRequest('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+    })
 
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Sign in failed'
-      }
-    }
+    return response.user
   },
 
-  async signOut(): Promise<{ success: boolean }> {
-    try {
-      const response = await makeRequest('/api/auth/logout', {
-        method: 'POST',
-      })
-
-      return response
-    } catch (error) {
-      return { success: false }
-    }
+  async signOut(): Promise<void> {
+    await makeRequest('/api/auth/logout', {
+      method: 'POST',
+    })
   },
 
-  async getCurrentUser(): Promise<LoginResponse> {
+  async getCurrentUser(): Promise<User | null> {
     try {
       const response = await makeRequest('/api/auth/me')
-      return response
-    } catch (error: any) {
+      return response.user || null
+    } catch (error) {
       // Don't treat 401 as an error - it just means no valid session
-      if (error.status === 401) {
-        return {
-          success: false,
-        }
+      if (error instanceof Error && 'status' in error && (error as Error & { status: number }).status === 401) {
+        return null
       }
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get current user'
-      }
+      throw error
     }
   }
 }

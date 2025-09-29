@@ -19,7 +19,6 @@ export const errorHandler = async (
   }
 
   reply.status(statusCode).send({
-    success: false,
     error: message,
     ...(config.nodeEnv === 'development' && { stack: error.stack })
   })
@@ -30,7 +29,6 @@ export const notFoundHandler = async (
   reply: FastifyReply
 ): Promise<void> => {
   reply.status(404).send({
-    success: false,
     error: `Route ${request.url} not found`
   })
 }

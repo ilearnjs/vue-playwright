@@ -8,7 +8,6 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
 
     if (!email || !password) {
       reply.status(400).send({
-        success: false,
         error: 'Email and password are required'
       })
       return
@@ -18,7 +17,6 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
 
     if (!userResponse) {
       reply.status(401).send({
-        success: false,
         error: 'Invalid email or password'
       })
       return
@@ -27,7 +25,6 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
     const user = sessionService.getUserByEmail(email)
     if (!user) {
       reply.status(500).send({
-        success: false,
         error: 'User data not found'
       })
       return
@@ -43,12 +40,10 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
     })
 
     reply.send({
-      success: true,
       user: userResponse
     })
   } catch (error) {
     reply.status(500).send({
-      success: false,
       error: 'Internal server error'
     })
   }
@@ -64,12 +59,9 @@ export const logout = async (request: FastifyRequest, reply: FastifyReply): Prom
 
     reply.clearCookie('session_id')
 
-    reply.send({
-      success: true
-    })
+    reply.send({})
   } catch (error) {
     reply.status(500).send({
-      success: false,
       error: 'Internal server error'
     })
   }
@@ -81,7 +73,6 @@ export const getCurrentUser = async (request: FastifyRequest & AuthenticatedRequ
 
     if (!sessionId) {
       reply.status(401).send({
-        success: false,
         error: 'No session found'
       })
       return
@@ -91,19 +82,16 @@ export const getCurrentUser = async (request: FastifyRequest & AuthenticatedRequ
 
     if (!user) {
       reply.status(401).send({
-        success: false,
         error: 'Invalid or expired session'
       })
       return
     }
 
     reply.send({
-      success: true,
       user
     })
   } catch (error) {
     reply.status(500).send({
-      success: false,
       error: 'Internal server error'
     })
   }

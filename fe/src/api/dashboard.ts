@@ -7,40 +7,20 @@ export interface Transaction {
   userId: string
 }
 
-export interface BalanceResponse {
-  success: boolean
-  data?: {
-    balance: number
-  }
-  error?: string
+export interface BalanceData {
+  balance: number
 }
 
-export interface MonthlyDataResponse {
-  success: boolean
-  data?: {
-    change: number
-    income: number
-    expenses: number
-  }
-  error?: string
-}
-
-export interface HistoryResponse {
-  success: boolean
-  data?: Transaction[]
-  error?: string
+export interface MonthlyData {
+  change: number
+  income: number
+  expenses: number
 }
 
 export interface CreateTransactionRequest {
   type: 'income' | 'expense'
   amount: number
   description: string
-}
-
-export interface CreateTransactionResponse {
-  success: boolean
-  data?: Transaction
-  error?: string
 }
 
 export interface UpdateTransactionRequest {
@@ -50,120 +30,71 @@ export interface UpdateTransactionRequest {
   description?: string
 }
 
-export interface UpdateTransactionResponse {
-  success: boolean
-  data?: Transaction
-  error?: string
-}
-
-export interface DeleteTransactionResponse {
-  success: boolean
-  error?: string
-}
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
 
 const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise<any> => {
   const url = `${API_BASE_URL}${endpoint}`
 
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string>),
+  }
+
+  // Only set Content-Type if there's a body
+  if (options.body) {
+    headers['Content-Type'] = 'application/json'
+  }
+
   const response = await fetch(url, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
     ...options,
+    headers,
   })
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`)
+    const error = new Error(`HTTP error! status: ${response.status}`) as Error & { status: number }
+    error.status = response.status
+    throw error
   }
 
   return response.json()
 }
 
 export const dashboardApi = {
-  async getTotalBalance(): Promise<BalanceResponse> {
-    try {
-      const response = await makeRequest('/api/dashboard/balance')
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get balance'
-      }
-    }
+  async getTotalBalance(): Promise<BalanceData> {
+    const response = await makeRequest('/api/dashboard/balance')
+    return response.data || { balance: 0 }
   },
 
-  async getMonthlyData(): Promise<MonthlyDataResponse> {
-    try {
-      const response = await makeRequest('/api/dashboard/monthly-data')
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get monthly data'
-      }
-    }
+  async getMonthlyData(): Promise<MonthlyData> {
+    const response = await makeRequest('/api/dashboard/monthly-data')
+    return response.data || { change: 0, income: 0, expenses: 0 }
   },
 
-  async getHistory(): Promise<HistoryResponse> {
-    try {
-      const response = await makeRequest('/api/dashboard/transactions')
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get transaction history'
-      }
-    }
+  async getHistory(): Promise<Transaction[]> {
+    const response = await makeRequest('/api/dashboard/transactions')
+    return response.data || []
   },
 
-  async createTransaction(data: CreateTransactionRequest): Promise<CreateTransactionResponse> {
-    try {
-      const response = await makeRequest('/api/dashboard/transactions', {
-        method: 'POST',
-        body: JSON.stringify(data),
-      })
-
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create transaction'
-      }
-    }
+  async createTransaction(data: CreateTransactionRequest): Promise<Transaction> {
+    const response = await makeRequest('/api/dashboard/transactions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+    return response.data
   },
 
-  async updateTransaction(data: UpdateTransactionRequest): Promise<UpdateTransactionResponse> {
-    try {
-      const { id, ...updateData } = data
-      const response = await makeRequest(`/api/dashboard/transactions/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-      })
-
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to update transaction'
-      }
-    }
+  async updateTransaction(data: UpdateTransactionRequest): Promise<Transaction> {
+    const { id, ...updateData } = data
+    const response = await makeRequest(`/api/dashboard/transactions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    })
+    return response.data
   },
 
-  async deleteTransaction(id: string): Promise<DeleteTransactionResponse> {
-    try {
-      const response = await makeRequest(`/api/dashboard/transactions/${id}`, {
-        method: 'DELETE',
-      })
-
-      return response
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete transaction'
-      }
-    }
+  async deleteTransaction(id: string): Promise<void> {
+    await makeRequest(`/api/dashboard/transactions/${id}`, {
+      method: 'DELETE',
+    })
   }
 }

@@ -40,186 +40,114 @@ const mockTransactions: Transaction[] = [
 ]
 
 export class DashboardService {
-  static async getUserBalance(userId: string): Promise<{ success: boolean; balance?: number; error?: string }> {
-    try {
-      const userTransactions = mockTransactions.filter(t => t.userId === userId)
-      const balance = userTransactions.reduce((sum, transaction) => {
-        return transaction.type === 'income'
-          ? sum + transaction.amount
-          : sum - transaction.amount
-      }, 0)
+  static async getUserBalance(userId: string): Promise<number> {
+    const userTransactions = mockTransactions.filter(t => t.userId === userId)
+    const balance = userTransactions.reduce((sum, transaction) => {
+      return transaction.type === 'income'
+        ? sum + transaction.amount
+        : sum - transaction.amount
+    }, 0)
 
-      return {
-        success: true,
-        balance
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get balance'
-      }
-    }
+    return balance
   }
 
-  static async getMonthlyData(userId: string): Promise<{ success: boolean; income?: number; expenses?: number; error?: string }> {
-    try {
-      const now = new Date()
-      const currentMonth = now.getMonth()
-      const currentYear = now.getFullYear()
+  static async getMonthlyData(userId: string): Promise<{ income: number; expenses: number }> {
+    const now = new Date()
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
-      const currentMonthTransactions = mockTransactions.filter(t => {
-        const transactionDate = t.createdAt
-        return t.userId === userId &&
-               transactionDate.getMonth() === currentMonth &&
-               transactionDate.getFullYear() === currentYear
-      })
+    const userTransactions = mockTransactions.filter(t =>
+      t.userId === userId && t.createdAt >= startOfMonth
+    )
 
-      const income = currentMonthTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + t.amount, 0)
+    const income = userTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0)
 
-      const expenses = currentMonthTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + t.amount, 0)
+    const expenses = userTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0)
 
-      return {
-        success: true,
-        income,
-        expenses
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get monthly data'
-      }
-    }
+    return { income, expenses }
   }
 
-  static async getUserTransactions(userId: string): Promise<{ success: boolean; transactions?: TransactionResponse[]; error?: string }> {
-    try {
-      const userTransactions = mockTransactions
-        .filter(t => t.userId === userId)
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .map(t => ({
-          id: t.id,
-          type: t.type,
-          amount: t.amount,
-          description: t.description || '',
-          date: t.createdAt.toISOString().split('T')[0] || '',
-          timestamp: t.createdAt.toISOString()
-        }))
+  static async getUserTransactions(userId: string): Promise<TransactionResponse[]> {
+    const userTransactions = mockTransactions
+      .filter(t => t.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map(t => ({
+        id: t.id,
+        userId: t.userId,
+        type: t.type,
+        amount: t.amount,
+        description: t.description,
+        date: t.createdAt.toISOString()
+      }))
 
-      return {
-        success: true,
-        transactions: userTransactions
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to get transactions'
-      }
-    }
+    return userTransactions
   }
 
-  static async createTransaction(userId: string, data: CreateTransactionRequest): Promise<{ success: boolean; transaction?: TransactionResponse; error?: string }> {
-    try {
-      const newId = (mockTransactions.length + 1).toString()
-      const now = new Date()
-
-      const newTransaction: Transaction = {
-        id: newId,
-        userId,
-        type: data.type,
-        amount: data.amount,
-        description: data.description || '',
-        createdAt: now,
-        updatedAt: now
-      }
-
-      mockTransactions.push(newTransaction)
-
-      const transactionResponse: TransactionResponse = {
-        id: newTransaction.id,
-        type: newTransaction.type,
-        amount: newTransaction.amount,
-        description: newTransaction.description || '',
-        date: newTransaction.createdAt.toISOString().split('T')[0] || '',
-        timestamp: newTransaction.createdAt.toISOString()
-      }
-
-      return {
-        success: true,
-        transaction: transactionResponse
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to create transaction'
-      }
+  static async createTransaction(userId: string, data: CreateTransactionRequest): Promise<TransactionResponse> {
+    const newTransaction: Transaction = {
+      id: String(Date.now()),
+      userId,
+      type: data.type,
+      amount: data.amount,
+      description: data.description || '',
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
+
+    mockTransactions.push(newTransaction)
+
+    const response: TransactionResponse = {
+      id: newTransaction.id,
+      userId: newTransaction.userId,
+      type: newTransaction.type,
+      amount: newTransaction.amount,
+      description: newTransaction.description,
+      date: newTransaction.createdAt.toISOString()
+    }
+
+    return response
   }
 
-  static async updateTransaction(userId: string, transactionId: string, data: UpdateTransactionRequest): Promise<{ success: boolean; transaction?: TransactionResponse; error?: string }> {
-    try {
-      const transactionIndex = mockTransactions.findIndex(t => t.id === transactionId && t.userId === userId)
+  static async updateTransaction(userId: string, transactionId: string, data: UpdateTransactionRequest): Promise<TransactionResponse> {
+    const transactionIndex = mockTransactions.findIndex(
+      t => t.id === transactionId && t.userId === userId
+    )
 
-      if (transactionIndex === -1) {
-        return {
-          success: false,
-          error: 'Transaction not found'
-        }
-      }
-
-      const transaction = mockTransactions[transactionIndex]!
-      const now = new Date()
-
-      if (data.type) transaction.type = data.type
-      if (data.amount !== undefined) transaction.amount = data.amount
-      if (data.description !== undefined) transaction.description = data.description
-      transaction.updatedAt = now
-
-      const transactionResponse: TransactionResponse = {
-        id: transaction.id,
-        type: transaction.type,
-        amount: transaction.amount,
-        description: transaction.description || '',
-        date: transaction.createdAt.toISOString().split('T')[0] || '',
-        timestamp: transaction.createdAt.toISOString()
-      }
-
-      return {
-        success: true,
-        transaction: transactionResponse
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to update transaction'
-      }
+    if (transactionIndex === -1) {
+      throw new Error('Transaction not found')
     }
+
+    const transaction = mockTransactions[transactionIndex]
+
+    if (data.type !== undefined) transaction.type = data.type
+    if (data.amount !== undefined) transaction.amount = data.amount
+    if (data.description !== undefined) transaction.description = data.description
+    transaction.updatedAt = new Date()
+
+    const response: TransactionResponse = {
+      id: transaction.id,
+      userId: transaction.userId,
+      type: transaction.type,
+      amount: transaction.amount,
+      description: transaction.description,
+      date: transaction.createdAt.toISOString()
+    }
+
+    return response
   }
 
-  static async deleteTransaction(userId: string, transactionId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const transactionIndex = mockTransactions.findIndex(t => t.id === transactionId && t.userId === userId)
+  static async deleteTransaction(userId: string, transactionId: string): Promise<void> {
+    const transactionIndex = mockTransactions.findIndex(
+      t => t.id === transactionId && t.userId === userId
+    )
 
-      if (transactionIndex === -1) {
-        return {
-          success: false,
-          error: 'Transaction not found'
-        }
-      }
-
-      mockTransactions.splice(transactionIndex, 1)
-
-      return {
-        success: true
-      }
-    } catch (error) {
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete transaction'
-      }
+    if (transactionIndex === -1) {
+      throw new Error('Transaction not found')
     }
+
+    mockTransactions.splice(transactionIndex, 1)
   }
 }

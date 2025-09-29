@@ -27,7 +27,6 @@ export const requireAuth = async (
 
   if (!sessionId) {
     reply.status(401).send({
-      success: false,
       error: 'Authentication required'
     })
     return
@@ -37,7 +36,6 @@ export const requireAuth = async (
 
   if (!user) {
     reply.status(401).send({
-      success: false,
       error: 'Invalid or expired session'
     })
     return

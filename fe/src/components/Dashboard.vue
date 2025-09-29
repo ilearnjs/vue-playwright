@@ -108,25 +108,18 @@ const loadDashboardData = async () => {
   isLoading.value = true
 
   try {
-    const [balanceResponse, monthlyDataResponse, historyResponse] = await Promise.all([
+    const [balanceData, monthlyData, history] = await Promise.all([
       dashboardApi.getTotalBalance(),
       dashboardApi.getMonthlyData(),
       dashboardApi.getHistory()
     ])
 
-    if (balanceResponse.success && balanceResponse.data) {
-      balance.value = balanceResponse.data.balance || 0
-    }
-
-    if (monthlyDataResponse.success && monthlyDataResponse.data) {
-      monthlyIncome.value = monthlyDataResponse.data.income || 0
-      monthlyExpenses.value = monthlyDataResponse.data.expenses || 0
-    }
-
-    if (historyResponse.success && historyResponse.data) {
-      transactions.value = historyResponse.data || []
-    }
+    balance.value = balanceData.balance || 0
+    monthlyIncome.value = monthlyData.income || 0
+    monthlyExpenses.value = monthlyData.expenses || 0
+    transactions.value = history || []
   } catch (error) {
+    console.error('Failed to load dashboard data:', error)
   } finally {
     isLoading.value = false
   }
@@ -160,23 +153,19 @@ const confirmDelete = async () => {
   if (!transaction) return
 
   try {
-    const response = await dashboardApi.deleteTransaction(transaction.id)
+    await dashboardApi.deleteTransaction(transaction.id)
 
-    if (response.success) {
-      const index = transactions.value.findIndex(t => t.id === transaction.id)
-      if (index !== -1) {
-        transactions.value.splice(index, 1)
+    const index = transactions.value.findIndex(t => t.id === transaction.id)
+    if (index !== -1) {
+      transactions.value.splice(index, 1)
 
-        if (transaction.type === 'income') {
-          balance.value = (balance.value || 0) - transaction.amount
-          monthlyIncome.value = (monthlyIncome.value || 0) - transaction.amount
-        } else {
-          balance.value = (balance.value || 0) + transaction.amount
-          monthlyExpenses.value = (monthlyExpenses.value || 0) - transaction.amount
-        }
+      if (transaction.type === 'income') {
+        balance.value = (balance.value || 0) - transaction.amount
+        monthlyIncome.value = (monthlyIncome.value || 0) - transaction.amount
+      } else {
+        balance.value = (balance.value || 0) + transaction.amount
+        monthlyExpenses.value = (monthlyExpenses.value || 0) - transaction.amount
       }
-    } else {
-      alert('Failed to delete transaction. Please try again.')
     }
   } catch (error) {
     alert('Error deleting transaction. Please try again.')
@@ -204,40 +193,19 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
         amount: data.amount,
         description: data.description
       }
-      const response = await dashboardApi.updateTransaction(updateData)
+      const updatedTransaction = await dashboardApi.updateTransaction(updateData)
 
-      if (response.success && response.data) {
-        const index = transactions.value.findIndex(t => t.id === data.id)
-        if (index !== -1) {
-          const oldTransaction = transactions.value[index]
+      const index = transactions.value.findIndex(t => t.id === data.id)
+      if (index !== -1) {
+        const oldTransaction = transactions.value[index]
 
-          if (oldTransaction.type === 'income') {
-            balance.value = (balance.value || 0) - oldTransaction.amount
-            monthlyIncome.value = (monthlyIncome.value || 0) - oldTransaction.amount
-          } else {
-            balance.value = (balance.value || 0) + oldTransaction.amount
-            monthlyExpenses.value = (monthlyExpenses.value || 0) - oldTransaction.amount
-          }
-
-          if (data.type === 'income') {
-            balance.value = (balance.value || 0) + data.amount
-            monthlyIncome.value = (monthlyIncome.value || 0) + data.amount
-          } else {
-            balance.value = (balance.value || 0) - data.amount
-            monthlyExpenses.value = (monthlyExpenses.value || 0) + data.amount
-          }
-
-          transactions.value[index] = response.data
+        if (oldTransaction.type === 'income') {
+          balance.value = (balance.value || 0) - oldTransaction.amount
+          monthlyIncome.value = (monthlyIncome.value || 0) - oldTransaction.amount
+        } else {
+          balance.value = (balance.value || 0) + oldTransaction.amount
+          monthlyExpenses.value = (monthlyExpenses.value || 0) - oldTransaction.amount
         }
-
-        closeModal()
-      } else {
-      }
-    } else {
-      const response = await dashboardApi.createTransaction(data)
-
-      if (response.success && response.data) {
-        transactions.value.unshift(response.data)
 
         if (data.type === 'income') {
           balance.value = (balance.value || 0) + data.amount
@@ -247,11 +215,27 @@ const handleTransactionSubmit = async (data: CreateTransactionRequest & { id?: s
           monthlyExpenses.value = (monthlyExpenses.value || 0) + data.amount
         }
 
-        closeModal()
-      } else {
+        transactions.value[index] = updatedTransaction
       }
+
+      closeModal()
+    } else {
+      const newTransaction = await dashboardApi.createTransaction(data)
+
+      transactions.value.unshift(newTransaction)
+
+      if (data.type === 'income') {
+        balance.value = (balance.value || 0) + data.amount
+        monthlyIncome.value = (monthlyIncome.value || 0) + data.amount
+      } else {
+        balance.value = (balance.value || 0) - data.amount
+        monthlyExpenses.value = (monthlyExpenses.value || 0) + data.amount
+      }
+
+      closeModal()
     }
   } catch (error) {
+    alert('Error saving transaction. Please try again.')
   }
 }
 

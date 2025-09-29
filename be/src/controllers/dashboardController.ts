@@ -5,23 +5,14 @@ import { DashboardService } from '../services/dashboardService'
 export const getBalance = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
     const user = request.user!
-    const result = await DashboardService.getUserBalance(user.id)
+    const balance = await DashboardService.getUserBalance(user.id)
 
-    if (result.success) {
-      reply.send({
-        success: true,
-        data: { totalBalance: result.balance }
-      })
-    } else {
-      reply.status(500).send({
-        success: false,
-        error: result.error
-      })
-    }
+    reply.send({
+      data: { balance }
+    })
   } catch (error) {
     reply.status(500).send({
-      success: false,
-      error: 'Internal server error'
+      error: error instanceof Error ? error.message : 'Internal server error'
     })
   }
 }
@@ -29,27 +20,18 @@ export const getBalance = async (request: FastifyRequest & AuthenticatedRequest,
 export const getMonthlyData = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
     const user = request.user!
-    const result = await DashboardService.getMonthlyData(user.id)
+    const { income, expenses } = await DashboardService.getMonthlyData(user.id)
 
-    if (result.success) {
-      reply.send({
-        success: true,
-        data: {
-          income: result.income,
-          expenses: result.expenses,
-          netChange: (result.income || 0) - (result.expenses || 0)
-        }
-      })
-    } else {
-      reply.status(500).send({
-        success: false,
-        error: result.error
-      })
-    }
+    reply.send({
+      data: {
+        income,
+        expenses,
+        change: income - expenses
+      }
+    })
   } catch (error) {
     reply.status(500).send({
-      success: false,
-      error: 'Internal server error'
+      error: error instanceof Error ? error.message : 'Internal server error'
     })
   }
 }
@@ -57,23 +39,14 @@ export const getMonthlyData = async (request: FastifyRequest & AuthenticatedRequ
 export const getTransactions = async (request: FastifyRequest & AuthenticatedRequest, reply: FastifyReply): Promise<void> => {
   try {
     const user = request.user!
-    const result = await DashboardService.getUserTransactions(user.id)
+    const transactions = await DashboardService.getUserTransactions(user.id)
 
-    if (result.success) {
-      reply.send({
-        success: true,
-        data: result.transactions
-      })
-    } else {
-      reply.status(500).send({
-        success: false,
-        error: result.error
-      })
-    }
+    reply.send({
+      data: transactions
+    })
   } catch (error) {
     reply.status(500).send({
-      success: false,
-      error: 'Internal server error'
+      error: error instanceof Error ? error.message : 'Internal server error'
     })
   }
 }
@@ -85,7 +58,6 @@ export const createTransaction = async (request: FastifyRequest & AuthenticatedR
 
     if (!data.type || !data.amount) {
       reply.status(400).send({
-        success: false,
         error: 'Type and amount are required'
       })
       return
@@ -93,7 +65,6 @@ export const createTransaction = async (request: FastifyRequest & AuthenticatedR
 
     if (data.type !== 'income' && data.type !== 'expense') {
       reply.status(400).send({
-        success: false,
         error: 'Type must be either "income" or "expense"'
       })
       return
@@ -101,29 +72,19 @@ export const createTransaction = async (request: FastifyRequest & AuthenticatedR
 
     if (data.amount <= 0) {
       reply.status(400).send({
-        success: false,
         error: 'Amount must be greater than 0'
       })
       return
     }
 
-    const result = await DashboardService.createTransaction(user.id, data)
+    const transaction = await DashboardService.createTransaction(user.id, data)
 
-    if (result.success) {
-      reply.status(201).send({
-        success: true,
-        data: result.transaction
-      })
-    } else {
-      reply.status(500).send({
-        success: false,
-        error: result.error
-      })
-    }
+    reply.status(201).send({
+      data: transaction
+    })
   } catch (error) {
     reply.status(500).send({
-      success: false,
-      error: 'Internal server error'
+      error: error instanceof Error ? error.message : 'Internal server error'
     })
   }
 }
@@ -136,7 +97,6 @@ export const updateTransaction = async (request: FastifyRequest & AuthenticatedR
 
     if (data.type && data.type !== 'income' && data.type !== 'expense') {
       reply.status(400).send({
-        success: false,
         error: 'Type must be either "income" or "expense"'
       })
       return
@@ -144,35 +104,26 @@ export const updateTransaction = async (request: FastifyRequest & AuthenticatedR
 
     if (data.amount !== undefined && data.amount <= 0) {
       reply.status(400).send({
-        success: false,
         error: 'Amount must be greater than 0'
       })
       return
     }
 
-    const result = await DashboardService.updateTransaction(user.id, id, data)
+    const transaction = await DashboardService.updateTransaction(user.id, id, data)
 
-    if (result.success) {
-      reply.send({
-        success: true,
-        data: result.transaction
-      })
-    } else if (result.error === 'Transaction not found') {
+    reply.send({
+      data: transaction
+    })
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Transaction not found') {
       reply.status(404).send({
-        success: false,
-        error: result.error
+        error: error.message
       })
     } else {
       reply.status(500).send({
-        success: false,
-        error: result.error
+        error: error instanceof Error ? error.message : 'Internal server error'
       })
     }
-  } catch (error) {
-    reply.status(500).send({
-      success: false,
-      error: 'Internal server error'
-    })
   }
 }
 
@@ -181,28 +132,18 @@ export const deleteTransaction = async (request: FastifyRequest & AuthenticatedR
     const user = request.user!
     const { id } = request.params as { id: string }
 
-    const result = await DashboardService.deleteTransaction(user.id, id)
+    await DashboardService.deleteTransaction(user.id, id)
 
-    if (result.success) {
-      reply.send({
-        success: true,
-        message: 'Transaction deleted successfully'
-      })
-    } else if (result.error === 'Transaction not found') {
+    reply.send({})
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Transaction not found') {
       reply.status(404).send({
-        success: false,
-        error: result.error
+        error: error.message
       })
     } else {
       reply.status(500).send({
-        success: false,
-        error: result.error
+        error: error instanceof Error ? error.message : 'Internal server error'
       })
     }
-  } catch (error) {
-    reply.status(500).send({
-      success: false,
-      error: 'Internal server error'
-    })
   }
 }

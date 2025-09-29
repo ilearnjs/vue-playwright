@@ -121,13 +121,14 @@ const handleSubmit = async () => {
     return
   }
 
-  const success = await authStore.signIn({
-    email: email.value,
-    password: password.value
-  })
-
-  if (success) {
+  try {
+    await authStore.signIn({
+      email: email.value,
+      password: password.value
+    })
     router.push('/')
+  } catch {
+    // Error is handled by the store
   }
 }
 </script>
