@@ -45,6 +45,7 @@
               type="email"
               required
               :disabled="authStore.isLoading"
+              data-testid="email-input"
               class="appearance-none relative block w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 text-sm sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter your email"
             />
@@ -60,6 +61,7 @@
               type="password"
               required
               :disabled="authStore.isLoading"
+              data-testid="password-input"
               class="appearance-none relative block w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 text-sm sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
               placeholder="Enter your password"
             />
@@ -89,6 +91,7 @@
           <button
             type="submit"
             :disabled="authStore.isLoading || !email || !password"
+            data-testid="sign-in-button"
             class="group relative w-full flex justify-center py-2.5 sm:py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
             <span v-if="authStore.isLoading" class="absolute left-0 inset-y-0 flex items-center pl-3">
