@@ -79,7 +79,7 @@ export class DashboardService {
         userId: t.userId,
         type: t.type,
         amount: t.amount,
-        description: t.description,
+        description: t.description || '',
         date: t.createdAt.toISOString()
       }))
 
@@ -104,7 +104,7 @@ export class DashboardService {
       userId: newTransaction.userId,
       type: newTransaction.type,
       amount: newTransaction.amount,
-      description: newTransaction.description,
+      description: newTransaction.description || '',
       date: newTransaction.createdAt.toISOString()
     }
 
@@ -121,6 +121,9 @@ export class DashboardService {
     }
 
     const transaction = mockTransactions[transactionIndex]
+    if (!transaction) {
+      throw new Error('Transaction not found')
+    }
 
     if (data.type !== undefined) transaction.type = data.type
     if (data.amount !== undefined) transaction.amount = data.amount
@@ -132,7 +135,7 @@ export class DashboardService {
       userId: transaction.userId,
       type: transaction.type,
       amount: transaction.amount,
-      description: transaction.description,
+      description: transaction.description || '',
       date: transaction.createdAt.toISOString()
     }
 
