@@ -14,14 +14,10 @@ const mockData = {
 }
 
 // Helper function to setup all API mocks
-async function setupAPIMocks(page: Page, options = { authenticated: false }) {
+async function setupAPIMocks(page: Page) {
   // Auth endpoint
   await page.route('**/api/auth/me', route => {
-    if (options.authenticated) {
-      route.fulfill({ status: 200, json: { user: mockData.user } })
-    } else {
-      route.fulfill({ status: 401, json: { error: 'No session' } })
-    }
+    route.fulfill({ status: 200, json: { user: mockData.user } })
   })
 
   // Dashboard endpoints
@@ -36,18 +32,16 @@ async function setupAPIMocks(page: Page, options = { authenticated: false }) {
   await page.route('**/api/dashboard/transactions', route =>
     route.fulfill({ status: 200, json: mockData.transactions })
   )
-
-  // Login endpoint
-  await page.route('**/api/auth/login', route =>
-    route.fulfill({ status: 200, json: { user: mockData.user } })
-  )
 }
 
 test.describe('Index Page Visual Tests', () => {
-  test('init state', async ({ page, auth }) => {
-    await setupAPIMocks(page, { authenticated: true })
+  // Set up mocks and auth for all tests in this describe block
+  test.beforeEach(async ({ page, auth }) => {
+    await setupAPIMocks(page)
     await auth()
+  })
 
+  test('init state', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
@@ -57,10 +51,7 @@ test.describe('Index Page Visual Tests', () => {
     })
   })
 
-  test('income modal', async ({ page, auth }) => {
-    await setupAPIMocks(page, { authenticated: true })
-    await auth()
-
+  test('income modal', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
@@ -73,10 +64,24 @@ test.describe('Index Page Visual Tests', () => {
     })
   })
 
-  test('expense modal', async ({ page, auth }) => {
-    await setupAPIMocks(page, { authenticated: true })
-    await auth()
+  test('income modal form filled', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
 
+    await page.getByTestId('add-income-button').click()
+    await page.waitForSelector('[data-testid="income-modal"]')
+
+    // Fill the form
+    await page.getByTestId('transaction-description-input').fill('Freelance Project Payment')
+    await page.getByTestId('transaction-amount-input').fill('1500.00')
+
+    await expect(page).toHaveScreenshot('index-page-income-modal-filled.png', {
+      fullPage: true,
+      animations: 'disabled',
+    })
+  })
+
+  test('expense modal', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
 
@@ -84,6 +89,23 @@ test.describe('Index Page Visual Tests', () => {
     await page.waitForSelector('[data-testid="expense-modal"]')
 
     await expect(page).toHaveScreenshot('index-page-expense-modal.png', {
+      fullPage: true,
+      animations: 'disabled',
+    })
+  })
+
+  test('expense modal form filled', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    await page.getByTestId('add-expense-button').click()
+    await page.waitForSelector('[data-testid="expense-modal"]')
+
+    // Fill the form
+    await page.getByTestId('transaction-description-input').fill('Monthly Rent Payment')
+    await page.getByTestId('transaction-amount-input').fill('2500.00')
+
+    await expect(page).toHaveScreenshot('index-page-expense-modal-filled.png', {
       fullPage: true,
       animations: 'disabled',
     })
