@@ -1,0 +1,70 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_call:
+    inputs:
+      update-snapshots:
+        description: "Update snapshots?"
+        type: boolean
+  workflow_dispatch:
+    inputs:
+      update-snapshots:
+        description: "Update snapshots?"
+        type: boolean
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+defaults:
+  run:
+    working-directory: ./fe
+
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22.18.0
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Restore snapshots
+      id: cache
+      uses: actions/cache/restore@v4
+      with:
+        key: snapshots-${{ github.ref }}
+        restore-keys: |
+          snapshots-refs/heads/master
+        path: fe/.tests/snapshots/
+
+    - name: Initialize snapshots (first run or manual update)
+      if: ${{steps.cache.outputs.cache-hit != true || inputs.update-snapshots == true}}
+      run: npx playwright test --update-snapshots
+
+    - name: Run Playwright tests
+      if: ${{steps.cache.outputs.cache-hit == true && inputs.update-snapshots != true}}
+      run: npx playwright test
+
+    - name: Save snapshots to cache
+      if: ${{steps.cache.outputs.cache-hit != true || inputs.update-snapshots == true}}
+      uses: actions/cache/save@v4
+      with:
+        key: snapshots-${{ github.ref }}
+        path: fe/.tests/snapshots/
+    - name: Upload test report artifact
+      uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: fe/.tests/test-report/
+        retention-days: 30
