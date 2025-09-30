@@ -4,6 +4,12 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 defaults:
   run:
     working-directory: ./fe
@@ -33,9 +39,27 @@ jobs:
       run: npx playwright test --update-snapshots
     - name: Run Playwright tests
       run: npx playwright test
-    - uses: actions/upload-artifact@v4
+    - name: Upload test report artifact
+      uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
         path: fe/.tests/test-report/
         retention-days: 30
+    - name: Upload Pages artifact
+      uses: actions/upload-pages-artifact@v3
+      if: ${{ !cancelled() }}
+      with:
+        path: fe/.tests/test-report/
+
+  deploy:
+    needs: test
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
