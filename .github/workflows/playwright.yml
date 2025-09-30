@@ -26,7 +26,7 @@ jobs:
       with:
         key: cache/${{github.repository}}/${{github.ref}}
         restore-keys: cache/${{github.repository}}/refs/heads/master
-        path: fe/tests/**_snapshots
+        path: fe/.tests/**
 
     - name: Initialize snapshots
       if: ${{steps.cache.outputs.cache-hit != 'true'}}

@@ -6,11 +6,22 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on',
   },
+
+  outputDir: '.tests/test-results/',
+  snapshotPathTemplate: process.env.CI
+    ? '.tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}'
+    : 'tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
+  reporter: [
+    ['html', {
+      outputFolder: '.tests/test-report',
+      open: 'never',
+    }],
+    process.env.CI ? ['github'] : ['line'],
+  ],
 
   projects: [
     {
