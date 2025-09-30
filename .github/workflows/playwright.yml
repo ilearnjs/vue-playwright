@@ -26,7 +26,7 @@ jobs:
       with:
         key: cache/${{github.repository}}/${{github.ref}}
         restore-keys: cache/${{github.repository}}/refs/heads/master
-        path: ./.tests/**
+        path: fe/.tests/**
 
     - name: Initialize snapshots
       if: ${{steps.cache.outputs.cache-hit != 'true'}}
@@ -37,5 +37,5 @@ jobs:
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
-        path: ./.tests/test-report/
+        path: fe/.tests/test-report/
         retention-days: 30
