@@ -26,22 +26,16 @@ test.describe('Auth Page Visual Tests', () => {
   })
 
   test('error state', async ({ page }) => {
-    await page.route('*/**/api/auth/login', async route => {
-      const response = {
-        ok: false,
-        status: 401,
-        json: {
-          message: 'Invalid email or password'
-        }
-      }
-      await route.fulfill(response)
-    })
+    await page.routeFromHAR('./tests/hars/auth/auth/login.har', {
+      url: '*/**/api/auth/login',
+      // update: true,
+    });
 
     await page.goto('/auth')
     await page.waitForLoadState('networkidle')
 
     await page.getByTestId('email-input').fill('user@example.com')
-    await page.getByTestId('password-input').fill('password')
+    await page.getByTestId('password-input').fill('wronpassword')
     await page.getByTestId('remember-me-checkbox').check()
     await page.getByTestId('sign-in-button').click()
 
