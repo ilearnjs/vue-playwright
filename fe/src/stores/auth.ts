@@ -37,6 +37,11 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const initializeAuth = async () => {
+    // Check if session cookie exists before making API call
+    if (!document.cookie.includes('session_id=')) {
+      return
+    }
+
     isLoading.value = true
     try {
       const userData = await authApi.getCurrentUser()
