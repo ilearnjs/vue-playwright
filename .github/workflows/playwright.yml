@@ -4,6 +4,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+defaults:
+  run:
+    working-directory: ./fe
 jobs:
   test:
     timeout-minutes: 60
@@ -13,8 +16,6 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 22.18.0
-    - name: Navigate to fe
-      run: cd fe
     - name: Install dependencies
       run: yarn install --frozen-lockfile
     - name: Install Playwright Browsers
