@@ -62,7 +62,6 @@ test.describe('Index Page Visual Tests', () => {
 
     await page.goto('/')
     await page.waitForLoadState('networkidle')
-    // await page.waitForTimeout(1000)
 
     await expect(page).toHaveScreenshot('index-page-auth.png', {
       fullPage: true,
