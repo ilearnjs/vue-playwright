@@ -7,9 +7,7 @@ export const getBalance = async (request: FastifyRequest & AuthenticatedRequest,
     const user = request.user!
     const balance = await DashboardService.getUserBalance(user.id)
 
-    reply.send({
-      data: { balance }
-    })
+    reply.send({ balance })
   } catch (error) {
     reply.status(500).send({
       error: error instanceof Error ? error.message : 'Internal server error'
@@ -23,11 +21,9 @@ export const getMonthlyData = async (request: FastifyRequest & AuthenticatedRequ
     const { income, expenses } = await DashboardService.getMonthlyData(user.id)
 
     reply.send({
-      data: {
-        income,
-        expenses,
-        change: income - expenses
-      }
+      income,
+      expenses,
+      change: income - expenses
     })
   } catch (error) {
     reply.status(500).send({
@@ -41,9 +37,7 @@ export const getTransactions = async (request: FastifyRequest & AuthenticatedReq
     const user = request.user!
     const transactions = await DashboardService.getUserTransactions(user.id)
 
-    reply.send({
-      data: transactions
-    })
+    reply.send(transactions)
   } catch (error) {
     reply.status(500).send({
       error: error instanceof Error ? error.message : 'Internal server error'
@@ -79,9 +73,7 @@ export const createTransaction = async (request: FastifyRequest & AuthenticatedR
 
     const transaction = await DashboardService.createTransaction(user.id, data)
 
-    reply.status(201).send({
-      data: transaction
-    })
+    reply.status(201).send(transaction)
   } catch (error) {
     reply.status(500).send({
       error: error instanceof Error ? error.message : 'Internal server error'
@@ -111,9 +103,7 @@ export const updateTransaction = async (request: FastifyRequest & AuthenticatedR
 
     const transaction = await DashboardService.updateTransaction(user.id, id, data)
 
-    reply.send({
-      data: transaction
-    })
+    reply.send(transaction)
   } catch (error) {
     if (error instanceof Error && error.message === 'Transaction not found') {
       reply.status(404).send({

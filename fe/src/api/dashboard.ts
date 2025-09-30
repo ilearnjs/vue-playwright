@@ -4,7 +4,6 @@ export interface Transaction {
   amount: number
   description: string
   date: string
-  userId: string
 }
 
 export interface BalanceData {
@@ -61,35 +60,30 @@ const makeRequest = async (endpoint: string, options: RequestInit = {}): Promise
 
 export const dashboardApi = {
   async getTotalBalance(): Promise<BalanceData> {
-    const response = await makeRequest('/api/dashboard/balance')
-    return response.data || { balance: 0 }
+    return await makeRequest('/api/dashboard/balance')
   },
 
   async getMonthlyData(): Promise<MonthlyData> {
-    const response = await makeRequest('/api/dashboard/monthly-data')
-    return response.data || { change: 0, income: 0, expenses: 0 }
+    return await makeRequest('/api/dashboard/monthly-data')
   },
 
   async getHistory(): Promise<Transaction[]> {
-    const response = await makeRequest('/api/dashboard/transactions')
-    return response.data || []
+    return await makeRequest('/api/dashboard/transactions')
   },
 
   async createTransaction(data: CreateTransactionRequest): Promise<Transaction> {
-    const response = await makeRequest('/api/dashboard/transactions', {
+    return await makeRequest('/api/dashboard/transactions', {
       method: 'POST',
       body: JSON.stringify(data),
     })
-    return response.data
   },
 
   async updateTransaction(data: UpdateTransactionRequest): Promise<Transaction> {
     const { id, ...updateData } = data
-    const response = await makeRequest(`/api/dashboard/transactions/${id}`, {
+    return await makeRequest(`/api/dashboard/transactions/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updateData),
     })
-    return response.data
   },
 
   async deleteTransaction(id: string): Promise<void> {

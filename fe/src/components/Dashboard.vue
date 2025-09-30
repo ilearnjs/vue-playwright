@@ -108,16 +108,27 @@ const loadDashboardData = async () => {
   isLoading.value = true
 
   try {
-    const [balanceData, monthlyData, history] = await Promise.all([
+    const results = await Promise.allSettled([
       dashboardApi.getTotalBalance(),
       dashboardApi.getMonthlyData(),
       dashboardApi.getHistory()
     ])
 
-    balance.value = balanceData.balance || 0
-    monthlyIncome.value = monthlyData.income || 0
-    monthlyExpenses.value = monthlyData.expenses || 0
-    transactions.value = history || []
+    const [balanceResult, monthlyDataResult, historyResult] = results
+
+    if (balanceResult.status === 'fulfilled') {
+      console.log('Balance Data:', balanceResult.value)
+      balance.value = balanceResult.value.balance || 0
+    }
+
+    if (monthlyDataResult.status === 'fulfilled') {
+      monthlyIncome.value = monthlyDataResult.value.income || 0
+      monthlyExpenses.value = monthlyDataResult.value.expenses || 0
+    }
+
+    if (historyResult.status === 'fulfilled') {
+      transactions.value = historyResult.value || []
+    }
   } catch (error) {
     console.error('Failed to load dashboard data:', error)
   } finally {
