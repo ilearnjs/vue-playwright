@@ -54,7 +54,7 @@ jobs:
 
   deploy:
     needs: test
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
