@@ -7,6 +7,7 @@
   >
     <!-- Modal content -->
     <div
+      :data-testid="type === 'income' ? 'income-modal' : 'expense-modal'"
       class="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md"
       @click.stop
     >
