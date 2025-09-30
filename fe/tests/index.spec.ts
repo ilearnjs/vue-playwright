@@ -9,8 +9,8 @@ test.describe('Index Page Visual Tests', () => {
         json: {
           user:
           {
-            id: 1, email:
-              'user@example.com',
+            id: 1,
+            email: 'user@example.com',
             name: 'User'
           }
         }
@@ -68,5 +68,5 @@ test.describe('Index Page Visual Tests', () => {
       fullPage: true,
       animations: 'disabled',
     })
-        })
+  })
 })
