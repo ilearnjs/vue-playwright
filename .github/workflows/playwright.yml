@@ -15,42 +15,63 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Checkout master for baseline snapshots
-      if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
       with:
         ref: master
         path: master-baseline
 
     - name: Setup Node.js for master baseline
-      if: github.event_name == 'pull_request'
       uses: actions/setup-node@v4
       with:
         node-version: 22.18.0
 
+    - name: Cache yarn dependencies (master)
+      uses: actions/cache@v4
+      with:
+        path: master-baseline/fe/node_modules
+        key: yarn-master-${{ hashFiles('master-baseline/fe/yarn.lock') }}
+        restore-keys: |
+          yarn-master-
+
+    - name: Cache Playwright browsers (master)
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-browsers-${{ runner.os }}
+        restore-keys: |
+          playwright-browsers-
+
     - name: Generate master snapshots
-      if: github.event_name == 'pull_request'
       working-directory: master-baseline/fe
       run: |
         yarn install --frozen-lockfile
         npx playwright install --with-deps
         npx playwright test --update-snapshots
-        echo "Generated snapshots:"
-        ls -la .tests/snaps/ || echo "No snaps directory"
-        find .tests -name "*.png" | head -10 || echo "No PNG files found"
 
     - name: Copy master snapshots as baseline
-      if: github.event_name == 'pull_request'
       run: |
-        echo "Checking master-baseline for snapshots:"
-        ls -la master-baseline/fe/.tests/snaps/ 2>/dev/null || echo "No snaps in master-baseline"
         mkdir -p fe/.tests/snaps
-        cp -r master-baseline/fe/.tests/snaps/* fe/.tests/snaps/ 2>/dev/null || echo "No snapshots to copy"
-        echo "Copied snapshots to PR:"
-        ls -la fe/.tests/snaps/ || echo "No snaps directory after copy"
+        cp -r master-baseline/fe/.tests/snaps/* fe/.tests/snaps/ 2>/dev/null || true
 
     - uses: actions/setup-node@v4
       with:
         node-version: 22.18.0
+
+    - name: Cache yarn dependencies (PR)
+      uses: actions/cache@v4
+      with:
+        path: fe/node_modules
+        key: yarn-pr-${{ hashFiles('fe/yarn.lock') }}
+        restore-keys: |
+          yarn-pr-
+
+    - name: Cache Playwright browsers (PR)
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-browsers-${{ runner.os }}
+        restore-keys: |
+          playwright-browsers-
 
     - name: Install dependencies
       working-directory: ./fe
