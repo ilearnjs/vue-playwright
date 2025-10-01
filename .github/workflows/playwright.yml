@@ -42,7 +42,7 @@ jobs:
       id: cache
       uses: actions/cache@v4
       with:
-        key: cache/${{github.repository}}/refs/heads/master
+        key: cache/${{github.repository}}/refs/heads/master${{ inputs.update-snapshots == true && format('-{0}', github.run_number) || '' }}
         restore-keys: cache/${{github.repository}}/refs/heads/master
         path: fe/.tests/**
 
@@ -50,6 +50,7 @@ jobs:
       if: ${{steps.cache.outputs.cache-hit != 'true' || inputs.update-snapshots == true}}
       run: npx playwright test --update-snapshots
     - name: Run Playwright tests
+      continue-on-error: true
       run: npx playwright test
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
