@@ -1,81 +1,56 @@
 name: Playwright Tests
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
-  workflow_call:
-    inputs:
-      update-snapshots:
-        description: "Update snapshots?"
-        type: boolean
-  workflow_dispatch:
-    inputs:
-      update-snapshots:
-        description: "Update snapshots?"
-        type: boolean
-
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-defaults:
-  run:
-    working-directory: ./fe
 
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout master for baseline snapshots
+      if: github.event_name == 'pull_request'
+      uses: actions/checkout@v4
+      with:
+        ref: master
+        path: master-baseline
+
+    - name: Generate master snapshots
+      if: github.event_name == 'pull_request'
+      working-directory: master-baseline/fe
+      run: |
+        yarn install --frozen-lockfile
+        npx playwright install --with-deps
+        npx playwright test --update-snapshots
+
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+
+    - name: Copy master snapshots as baseline
+      if: github.event_name == 'pull_request'
+      run: |
+        mkdir -p fe/.tests/snaps
+        cp -r master-baseline/fe/.tests/snaps/* fe/.tests/snaps/ 2>/dev/null || echo "No snapshots to copy"
+
     - uses: actions/setup-node@v4
       with:
         node-version: 22.18.0
+
     - name: Install dependencies
+      working-directory: ./fe
       run: yarn install --frozen-lockfile
+
     - name: Install Playwright Browsers
+      working-directory: ./fe
       run: npx playwright install --with-deps
 
-    - name: Debug cache info
-      run: |
-        echo "github.ref: ${{ github.ref }}"
-        echo "github.ref_name: ${{ github.ref_name }}"
-        echo "github.head_ref: ${{ github.head_ref }}"
-        echo "github.base_ref: ${{ github.base_ref }}"
-        echo "Event name: ${{ github.event_name }}"
-
-    - name: Restore snapshots
-      id: cache
-      uses: actions/cache/restore@v4
-      with:
-        key: snapshots-${{ github.head_ref || github.ref_name }}
-        restore-keys: snapshots-master
-        path: fe/.tests/snaps/
-
-    - name: Debug snapshot update decision
-      run: |
-        echo "Cache hit: ${{ steps.cache.outputs.cache-hit }}"
-        echo "Cache hit type: ${{ toJSON(steps.cache.outputs.cache-hit) }}"
-        echo "Input update-snapshots: ${{ inputs.update-snapshots }}"
-        echo "Input type: ${{ toJSON(inputs.update-snapshots) }}"
-
-    - name: Initialize snapshots (first run or manual update)
-      if: ${{ steps.cache.outputs.cache-hit != 'true' || inputs.update-snapshots == 'true' }}
-      run: npx playwright test --update-snapshots
-
     - name: Run Playwright tests
-      if: ${{ steps.cache.outputs.cache-hit == 'true' && inputs.update-snapshots != 'true' }}
+      working-directory: ./fe
       run: npx playwright test
 
-    - name: Save snapshots to cache
-      if: ${{(steps.cache.outputs.cache-hit != true || inputs.update-snapshots == 'true') && hashFiles('fe/.tests/snaps/**') != ''}}
-      uses: actions/cache/save@v4
-      with:
-        key: ${{ github.ref_name == 'master' && 'snapshots-master' || format('snapshots-{0}', github.head_ref || github.ref_name) }}
-        path: fe/.tests/snaps/
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
