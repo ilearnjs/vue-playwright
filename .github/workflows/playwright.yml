@@ -46,11 +46,6 @@ jobs:
         name: playwright-report
         path: fe/.tests/test-report/
         retention-days: 30
-    - name: Upload Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      if: ${{ !cancelled() }}
-      with:
-        path: fe/.tests/test-report/
 
   deploy:
     needs: test
