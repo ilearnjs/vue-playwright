@@ -1,5 +1,71 @@
 import { defineConfig, devices } from '@playwright/test'
 
+// Chromium – 3 breakpoints
+const projectsChromium = [
+  {
+    name: 'chromium-pixel5',
+    use: {
+      ...devices['Pixel 5'],
+      viewport: { width: 360, height: 800 },
+      isMobile: true,
+      hasTouch: true,
+    },
+  },
+  {
+    name: 'chromium-768',
+    use: {
+      ...devices['Desktop Chrome'],
+      viewport: { width: 768, height: 800 },
+    },
+  },
+  {
+    name: 'chromium-1920',
+    use: {
+      ...devices['Desktop Chrome'],
+      viewport: { width: 1920, height: 800 },
+    },
+  },
+]
+
+// WebKit – 2 breakpoints
+const projectsWebKit = [
+  {
+    name: 'webkit-360',
+    use: {
+      ...devices['Desktop Safari'],
+      viewport: { width: 360, height: 800 },
+      isMobile: true,
+      hasTouch: true,
+    },
+  },
+  {
+    name: 'webkit-1920',
+    use: {
+      ...devices['Desktop Safari'],
+      viewport: { width: 1920, height: 800 },
+    },
+  },
+]
+
+// Mobile Safari (iOS emulation) – 1 breakpoint
+const projectsSafari = [
+  {
+    name: 'mobile-safari-iphone12',
+    use: { ...devices['iPhone 12'] },
+  },
+]
+
+// Firefox – 1 breakpoint
+const projectsFirefox = [
+  {
+    name: 'firefox-1920',
+    use: {
+      ...devices['Desktop Firefox'],
+      viewport: { width: 1920, height: 800 },
+    },
+  },
+]
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
@@ -24,27 +90,10 @@ export default defineConfig({
   ],
 
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    ...projectsChromium,
+    ...projectsWebKit,
+    ...projectsSafari,
+    ...projectsFirefox,
   ],
   webServer: {
     command: 'yarn dev',
