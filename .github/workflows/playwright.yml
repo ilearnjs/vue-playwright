@@ -5,6 +5,18 @@ on:
   pull_request:
     branches: [ master ]
 
+workflow_call:
+  inputs:
+    update-snapshots:
+      description: "Update snapshots?"
+      type: boolean
+
+workflow_dispatch: 
+  inputs:
+    update-snapshots:
+      description: "Update snapshots?"
+      type: boolean
+
 permissions:
   contents: read
   pages: write
@@ -13,6 +25,7 @@ permissions:
 defaults:
   run:
     working-directory: ./fe
+
 jobs:
   test:
     timeout-minutes: 60
@@ -35,7 +48,7 @@ jobs:
         path: fe/.tests/**
 
     - name: Initialize snapshots
-      if: ${{steps.cache.outputs.cache-hit != 'true'}}
+      if: ${{steps.cache.outputs.cache-hit != 'true' || inputs.update-snapshots == 'true'}}
       run: npx playwright test --update-snapshots
     - name: Run Playwright tests
       run: npx playwright test
