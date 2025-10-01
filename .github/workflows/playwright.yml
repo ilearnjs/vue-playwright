@@ -20,10 +20,19 @@ jobs:
         ref: master
         path: master-baseline
 
-    - name: Setup Node.js for master baseline
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 22.18.0
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          playwright-${{ runner.os }}-
 
     - name: Cache yarn dependencies (master)
       uses: actions/cache@v4
@@ -32,14 +41,6 @@ jobs:
         key: yarn-master-${{ hashFiles('master-baseline/fe/yarn.lock') }}
         restore-keys: |
           yarn-master-
-
-    - name: Cache Playwright browsers (master)
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/ms-playwright
-        key: playwright-browsers-${{ runner.os }}
-        restore-keys: |
-          playwright-browsers-
 
     - name: Generate master snapshots
       working-directory: master-baseline/fe
@@ -53,10 +54,6 @@ jobs:
         mkdir -p fe/.tests/snaps
         cp -r master-baseline/fe/.tests/snaps/* fe/.tests/snaps/ 2>/dev/null || true
 
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 22.18.0
-
     - name: Cache yarn dependencies (PR)
       uses: actions/cache@v4
       with:
@@ -64,14 +61,6 @@ jobs:
         key: yarn-pr-${{ hashFiles('fe/yarn.lock') }}
         restore-keys: |
           yarn-pr-
-
-    - name: Cache Playwright browsers (PR)
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/ms-playwright
-        key: playwright-browsers-${{ runner.os }}
-        restore-keys: |
-          playwright-browsers-
 
     - name: Install dependencies
       working-directory: ./fe
