@@ -31,6 +31,9 @@ jobs:
         yarn install --frozen-lockfile
         npx playwright install --with-deps
         npx playwright test --update-snapshots
+        echo "Generated snapshots:"
+        ls -la .tests/snaps/ || echo "No snaps directory"
+        find .tests -name "*.png" | head -10 || echo "No PNG files found"
 
     - name: Checkout PR branch
       uses: actions/checkout@v4
@@ -38,8 +41,12 @@ jobs:
     - name: Copy master snapshots as baseline
       if: github.event_name == 'pull_request'
       run: |
+        echo "Checking master-baseline for snapshots:"
+        ls -la master-baseline/fe/.tests/snaps/ 2>/dev/null || echo "No snaps in master-baseline"
         mkdir -p fe/.tests/snaps
         cp -r master-baseline/fe/.tests/snaps/* fe/.tests/snaps/ 2>/dev/null || echo "No snapshots to copy"
+        echo "Copied snapshots to PR:"
+        ls -la fe/.tests/snaps/ || echo "No snaps directory after copy"
 
     - uses: actions/setup-node@v4
       with:
