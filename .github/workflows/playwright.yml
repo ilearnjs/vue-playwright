@@ -23,21 +23,25 @@ jobs:
 
     - name: Cache yarn dependencies
       uses: actions/cache@v4
+      id: yarn-cache
       with:
         path: fe/node_modules
         key: yarn-master-${{ hashFiles('fe/yarn.lock') }}
 
     - name: Cache Playwright browsers
       uses: actions/cache@v4
+      id: playwright-cache
       with:
         path: ~/.cache/ms-playwright
         key: playwright-master-${{ runner.os }}-${{ hashFiles('fe/yarn.lock') }}
 
     - name: Install dependencies
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
       working-directory: ./fe
       run: yarn install --frozen-lockfile
 
     - name: Install Playwright browsers
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       working-directory: ./fe
       run: npx playwright install --with-deps
 
