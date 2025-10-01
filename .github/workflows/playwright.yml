@@ -38,29 +38,44 @@ jobs:
       run: yarn install --frozen-lockfile
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+
+    - name: Debug cache info
+      run: |
+        echo "github.ref: ${{ github.ref }}"
+        echo "github.ref_name: ${{ github.ref_name }}"
+        echo "github.head_ref: ${{ github.head_ref }}"
+        echo "github.base_ref: ${{ github.base_ref }}"
+        echo "Event name: ${{ github.event_name }}"
+
     - name: Restore snapshots
       id: cache
       uses: actions/cache/restore@v4
       with:
-        key: snapshots-${{ github.ref }}
-        restore-keys: |
-          snapshots-refs/heads/master
-        path: fe/.tests/snapshots/
+        key: snapshots-${{ github.head_ref || github.ref_name }}
+        restore-keys: snapshots-master
+        path: fe/.tests/snaps/
+
+    - name: Debug snapshot update decision
+      run: |
+        echo "Cache hit: ${{ steps.cache.outputs.cache-hit }}"
+        echo "Cache hit type: ${{ toJSON(steps.cache.outputs.cache-hit) }}"
+        echo "Input update-snapshots: ${{ inputs.update-snapshots }}"
+        echo "Input type: ${{ toJSON(inputs.update-snapshots) }}"
 
     - name: Initialize snapshots (first run or manual update)
-      if: ${{steps.cache.outputs.cache-hit != true || inputs.update-snapshots == true}}
+      if: ${{ steps.cache.outputs.cache-hit != 'true' || inputs.update-snapshots == 'true' }}
       run: npx playwright test --update-snapshots
 
     - name: Run Playwright tests
-      if: ${{steps.cache.outputs.cache-hit == true && inputs.update-snapshots != true}}
+      if: ${{ steps.cache.outputs.cache-hit == 'true' && inputs.update-snapshots != 'true' }}
       run: npx playwright test
 
     - name: Save snapshots to cache
-      if: ${{steps.cache.outputs.cache-hit != true || inputs.update-snapshots == true}}
+      if: ${{(steps.cache.outputs.cache-hit != true || inputs.update-snapshots == 'true') && hashFiles('fe/.tests/snaps/**') != ''}}
       uses: actions/cache/save@v4
       with:
-        key: snapshots-${{ github.ref }}
-        path: fe/.tests/snapshots/
+        key: ${{ github.ref_name == 'master' && 'snapshots-master' || format('snapshots-{0}', github.head_ref || github.ref_name) }}
+        path: fe/.tests/snaps/
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
