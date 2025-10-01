@@ -8,7 +8,7 @@
     </div>
 
     <div class="space-y-12">
-      <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+      <!-- <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <h2 class="text-2xl font-semibold text-gray-900 mb-4">Our Mission</h2>
         <p class="text-gray-600 leading-relaxed text-lg">
           FinanceTracker empowers individuals to make informed financial decisions through intuitive tools
@@ -16,7 +16,7 @@
           capabilities that were once only available to wealth managers and financial advisors. Our platform
           simplifies complex financial concepts and provides actionable insights to help you build lasting wealth.
         </p>
-      </section>
+      </section> -->
 
       <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <h2 class="text-2xl font-semibold text-gray-900 mb-6">Core Features</h2>
