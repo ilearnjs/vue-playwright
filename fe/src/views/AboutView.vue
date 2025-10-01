@@ -175,6 +175,19 @@
           </RouterLink>
         </div>
       </section>
+
+      <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Our Commitment</h2>
+        <p class="text-gray-600 leading-relaxed text-lg mb-4">
+          We are dedicated to providing transparent, reliable, and user-friendly financial management tools
+          that adapt to your unique needs. Our team continuously improves the platform based on user feedback
+          and the latest financial technology innovations.
+        </p>
+        <p class="text-gray-600 leading-relaxed text-lg">
+          With FinanceTracker, you're not just using software—you're joining a community of financially
+          empowered individuals who are taking charge of their future, one smart decision at a time.
+        </p>
+      </section>
     </div>
   </main>
 </template>
