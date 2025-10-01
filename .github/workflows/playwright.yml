@@ -78,9 +78,7 @@ jobs:
       id: yarn-master-baseline-cache
       with:
         path: master-baseline/fe/node_modules
-        key: yarn-${{ hashFiles('master-baseline/fe/yarn.lock') }}
-        restore-keys: |
-          yarn-
+        key: yarn-baseline-${{ hashFiles('master-baseline/fe/yarn.lock') }}
 
     - name: Install dependencies (master)
       working-directory: master-baseline/fe
