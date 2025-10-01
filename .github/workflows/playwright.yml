@@ -1,5 +1,7 @@
 name: Playwright Tests
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -7,7 +9,40 @@ permissions:
   contents: read
 
 jobs:
+  cache-dependencies:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.18.0
+
+    - name: Cache yarn dependencies
+      uses: actions/cache@v4
+      with:
+        path: fe/node_modules
+        key: yarn-master-${{ hashFiles('fe/yarn.lock') }}
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-master-${{ runner.os }}-${{ hashFiles('fe/yarn.lock') }}
+
+    - name: Install dependencies
+      working-directory: ./fe
+      run: yarn install --frozen-lockfile
+
+    - name: Install Playwright browsers
+      working-directory: ./fe
+      run: npx playwright install --with-deps
+
   test:
+    if: github.event_name == 'pull_request'
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -30,16 +65,17 @@ jobs:
       id: playwright-cache
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        key: playwright-pr-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          playwright-${{ runner.os }}-
+          playwright-master-${{ runner.os }}-
+          playwright-
 
-    - name: Cache yarn dependencies (master)
+    - name: Cache yarn dependencies (master baseline)
       uses: actions/cache@v4
       id: yarn-master-cache
       with:
         path: master-baseline/fe/node_modules
-        key: yarn-master-${{ hashFiles('master-baseline/fe/yarn.lock') }}
+        key: yarn-pr-master-baseline-${{ hashFiles('master-baseline/fe/yarn.lock') }}
         restore-keys: |
           yarn-master-
 
@@ -70,7 +106,7 @@ jobs:
         path: fe/node_modules
         key: yarn-pr-${{ hashFiles('fe/yarn.lock') }}
         restore-keys: |
-          yarn-pr-
+          yarn-master-
 
     - name: Install dependencies
       working-directory: ./fe
