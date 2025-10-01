@@ -11,6 +11,9 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+
     - name: Checkout master for baseline snapshots
       if: github.event_name == 'pull_request'
       uses: actions/checkout@v4
@@ -34,9 +37,6 @@ jobs:
         echo "Generated snapshots:"
         ls -la .tests/snaps/ || echo "No snaps directory"
         find .tests -name "*.png" | head -10 || echo "No PNG files found"
-
-    - name: Checkout PR branch
-      uses: actions/checkout@v4
 
     - name: Copy master snapshots as baseline
       if: github.event_name == 'pull_request'
