@@ -175,6 +175,19 @@
           </RouterLink>
         </div>
       </section>
+
+      <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Customer Support</h2>
+        <p class="text-gray-600 leading-relaxed text-lg mb-6">
+          Our dedicated support team is here to help you succeed with FinanceTracker.
+          We offer comprehensive documentation, video tutorials, and 24/7 customer support to ensure
+          you get the most out of our platform.
+        </p>
+        <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+          <p class="text-indigo-800 font-medium">Need assistance?</p>
+          <p class="text-indigo-700 text-sm">Contact us at support@financetracker.com or visit our help center.</p>
+        </div>
+      </section>
     </div>
   </main>
 </template>
