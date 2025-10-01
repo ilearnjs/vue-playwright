@@ -18,6 +18,12 @@ jobs:
         ref: master
         path: master-baseline
 
+    - name: Setup Node.js for master baseline
+      if: github.event_name == 'pull_request'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.18.0
+
     - name: Generate master snapshots
       if: github.event_name == 'pull_request'
       working-directory: master-baseline/fe
