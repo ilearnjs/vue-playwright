@@ -1,5 +1,7 @@
 name: Playwright Tests
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -7,7 +9,44 @@ permissions:
   contents: read
 
 jobs:
+  cache-dependencies:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.18.0
+
+    - name: Cache yarn dependencies
+      uses: actions/cache@v4
+      id: yarn-cache
+      with:
+        path: fe/node_modules
+        key: yarn-${{ hashFiles('fe/yarn.lock') }}
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('fe/yarn.lock') }}
+
+    - name: Install dependencies
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
+      working-directory: ./fe
+      run: yarn install --frozen-lockfile
+
+    - name: Install Playwright browsers
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      working-directory: ./fe
+      run: npx playwright install --with-deps
+
   test:
+    if: github.event_name == 'pull_request'
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -30,23 +69,32 @@ jobs:
       id: playwright-cache
       with:
         path: ~/.cache/ms-playwright
-        key: playwright-${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+        key: playwright-${{ runner.os }}-${{ hashFiles('fe/yarn.lock') }}
         restore-keys: |
           playwright-${{ runner.os }}-
 
-    - name: Cache yarn dependencies (master)
+    - name: Cache yarn dependencies (master baseline)
       uses: actions/cache@v4
+      id: yarn-master-baseline-cache
       with:
         path: master-baseline/fe/node_modules
-        key: yarn-master-${{ hashFiles('master-baseline/fe/yarn.lock') }}
+        key: yarn-${{ hashFiles('master-baseline/fe/yarn.lock') }}
         restore-keys: |
-          yarn-master-
+          yarn-
+
+    - name: Install dependencies (master)
+      working-directory: master-baseline/fe
+      if: steps.yarn-master-baseline-cache.outputs.cache-hit != 'true'
+      run: yarn install --frozen-lockfile
+
+    - name: Install Playwright Browsers (master)
+      working-directory: master-baseline/fe
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      run: npx playwright install --with-deps
 
     - name: Generate master snapshots
       working-directory: master-baseline/fe
       run: |
-        yarn install --frozen-lockfile
-        npx playwright install --with-deps
         npx playwright test --update-snapshots
 
     - name: Copy master snapshots as baseline
@@ -56,18 +104,21 @@ jobs:
 
     - name: Cache yarn dependencies (PR)
       uses: actions/cache@v4
+      id: yarn-pr-cache
       with:
         path: fe/node_modules
-        key: yarn-pr-${{ hashFiles('fe/yarn.lock') }}
+        key: yarn-${{ hashFiles('fe/yarn.lock') }}
         restore-keys: |
-          yarn-pr-
+          yarn-
 
     - name: Install dependencies
       working-directory: ./fe
+      if: steps.yarn-pr-cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
 
     - name: Install Playwright Browsers
       working-directory: ./fe
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: npx playwright install --with-deps
 
     - name: Run Playwright tests
