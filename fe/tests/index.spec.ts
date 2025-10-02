@@ -94,4 +94,38 @@ test.describe('Index Page Visual Tests', () => {
       animations: 'disabled',
     })
   })
+
+  test('edit transaction modal', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    // Click edit button on first transaction
+    await page.locator('[data-testid="transaction-item"]').first().locator('[data-testid="edit-transaction-button"]').click()
+    await page.waitForSelector('[data-testid="edit-modal"]')
+
+    await expect(page).toHaveScreenshot('index-page-edit-modal.png', {
+      fullPage: true,
+      animations: 'disabled',
+    })
+  })
+
+  test('edit transaction modal form filled', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    // Click edit button on first transaction
+    await page.locator('[data-testid="transaction-item"]').first().locator('[data-testid="edit-transaction-button"]').click()
+    await page.waitForSelector('[data-testid="edit-modal"]')
+
+    // Modify the form
+    await page.getByTestId('transaction-description-input').clear()
+    await page.getByTestId('transaction-description-input').fill('Updated Transaction Description')
+    await page.getByTestId('transaction-amount-input').clear()
+    await page.getByTestId('transaction-amount-input').fill('3750.50')
+
+    await expect(page).toHaveScreenshot('index-page-edit-modal-modified.png', {
+      fullPage: true,
+      animations: 'disabled',
+    })
+  })
 })

@@ -8,23 +8,23 @@ const projectsChromium = [
       ...devices['Pixel 5'],
       viewport: { width: 360, height: 800 },
       isMobile: true,
-      hasTouch: true,
-    },
+      hasTouch: true
+    }
   },
   {
     name: 'chromium-768',
     use: {
       ...devices['Desktop Chrome'],
-      viewport: { width: 768, height: 800 },
-    },
+      viewport: { width: 768, height: 800 }
+    }
   },
   {
     name: 'chromium-1920',
     use: {
       ...devices['Desktop Chrome'],
-      viewport: { width: 1920, height: 800 },
-    },
-  },
+      viewport: { width: 1920, height: 800 }
+    }
+  }
 ]
 
 // WebKit – 2 breakpoints
@@ -35,24 +35,24 @@ const projectsWebKit = [
       ...devices['Desktop Safari'],
       viewport: { width: 360, height: 800 },
       isMobile: true,
-      hasTouch: true,
+      hasTouch: true
     },
   },
   {
     name: 'webkit-1920',
     use: {
       ...devices['Desktop Safari'],
-      viewport: { width: 1920, height: 800 },
-    },
-  },
+      viewport: { width: 1920, height: 800 }
+    }
+  }
 ]
 
 // Mobile Safari (iOS emulation) – 1 breakpoint
 const projectsSafari = [
   {
     name: 'mobile-safari-iphone12',
-    use: { ...devices['iPhone 12'] },
-  },
+    use: { ...devices['iPhone 12'] }
+  }
 ]
 
 // Firefox – 1 breakpoint
@@ -61,9 +61,9 @@ const projectsFirefox = [
     name: 'firefox-1920',
     use: {
       ...devices['Desktop Firefox'],
-      viewport: { width: 1920, height: 800 },
-    },
-  },
+      viewport: { width: 1920, height: 800 }
+    }
+  }
 ]
 
 export default defineConfig({
@@ -74,7 +74,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   use: {
     baseURL: 'http://localhost:5173',
-    trace: 'on',
+    trace: 'on'
   },
 
   outputDir: '.tests/test-results/',
@@ -84,7 +84,7 @@ export default defineConfig({
   reporter: [
     ['html', {
       outputFolder: '.tests/test-report',
-      open: 'never',
+      open: 'never'
     }],
     process.env.CI ? ['github'] : ['line'],
   ],
@@ -98,6 +98,6 @@ export default defineConfig({
   webServer: {
     command: 'yarn dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
-  },
+    reuseExistingServer: !process.env.CI
+  }
 })

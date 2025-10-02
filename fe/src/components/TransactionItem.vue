@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-between py-2 sm:py-3 px-1 sm:px-2 rounded-lg hover:bg-gray-50 group">
+  <div data-testid="transaction-item" class="flex items-center justify-between py-2 sm:py-3 px-1 sm:px-2 rounded-lg hover:bg-gray-50 group">
     <div class="flex items-center flex-1 min-w-0">
       <div :class="[
         'w-8 sm:w-10 h-8 sm:h-10 rounded-lg flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0',
@@ -34,6 +34,7 @@
       <!-- Action buttons (always visible on mobile, hover on desktop) -->
       <div class="flex items-center space-x-1 sm:space-x-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
         <button
+          data-testid="edit-transaction-button"
           @click="$emit('edit', transaction)"
           class="p-1 sm:p-1.5 text-gray-400 hover:text-blue-600 focus:outline-none focus:text-blue-600"
           title="Edit transaction"
