@@ -158,14 +158,14 @@ jobs:
         echo "Directory contents:"
         ls -la
         echo "Checking for test report directory:"
-        if [ -d ".tests/test-report" ]; then
-          echo "✅ Found .tests/test-report"
+        if [ -d "./.tests/test-report" ]; then
+          echo "✅ Found ./.tests/test-report"
           echo "Report contents:"
-          ls -la .tests/test-report/ || true
+          ls -la ./.tests/test-report/ || true
         else
-          echo "❌ .tests/test-report not found"
-          echo "Checking .tests directory:"
-          ls -la .tests/ 2>/dev/null || echo ".tests directory not found"
+          echo "❌ ./.tests/test-report not found"
+          echo "Checking ./.tests directory:"
+          ls -la ./.tests/ 2>/dev/null || echo "./.tests directory not found"
         fi
 
         # Check if bucket name is provided
@@ -175,8 +175,8 @@ jobs:
         fi
 
         # Only sync if the directory exists
-        if [ -d ".tests/test-report" ]; then
-          aws s3 sync .tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
+        if [ -d "./.tests/test-report" ]; then
+          aws s3 sync ./.tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
             --delete \
             --cache-control "public, max-age=3600"
 
