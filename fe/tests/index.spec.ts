@@ -1,22 +1,44 @@
 import { test, expect } from './_setup'
 import type { Page } from '@playwright/test'
+import { generateUser, generateBalance, generateMonthlyData, generateRecentTransactions } from './mocks'
 
 async function setupAPIMocks(page: Page) {
-  await page.routeFromHAR('./tests/hars/index/auth/me.har', {
-    url: '*/**/api/auth/me',
-  });
+  const user = generateUser()
+  const balance = generateBalance()
+  const monthlyData = generateMonthlyData()
+  const transactions = generateRecentTransactions()
 
-  await page.routeFromHAR('./tests/hars/index/dashboard/balance.har', {
-    url: '*/**/api/dashboard/balance',
-  });
+  await page.route('*/**/api/auth/me', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ user })  // Backend returns { user: userData }
+    })
+  })
 
-  await page.routeFromHAR('./tests/hars/index/dashboard/monthly-data.har', {
-    url: '*/**/api/dashboard/monthly-data',
-  });
+  await page.route('*/**/api/dashboard/balance', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(balance)
+    })
+  })
 
-  await page.routeFromHAR('./tests/hars/index/dashboard/transactions.har', {
-    url: '*/**/api/dashboard/transactions',
-  });
+  await page.route('*/**/api/dashboard/monthly-data', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(monthlyData)
+    })
+  })
+
+  await page.route('*/**/api/dashboard/transactions', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(transactions)
+    })
+  })
 }
 
 test.describe('Index Page Visual Tests', () => {
