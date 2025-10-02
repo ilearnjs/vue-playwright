@@ -78,9 +78,7 @@ export default defineConfig({
   },
 
   outputDir: '.tests/test-results/',
-  snapshotPathTemplate: process.env.CI
-    ? '.tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}'
-    : 'tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
+  snapshotPathTemplate: '.tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
   reporter: [
     ['html', {
       outputFolder: '.tests/test-report',
