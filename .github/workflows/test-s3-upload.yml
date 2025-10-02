@@ -1,0 +1,166 @@
+name: Test S3 Upload
+
+on:
+  push:
+    branches: [ '**' ]  # Runs on any branch
+  workflow_dispatch:
+    inputs:
+      test_message:
+        description: 'Test message to include in the file'
+        required: false
+        default: 'Hello from GitHub Actions!'
+
+jobs:
+  test-s3-upload:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Create test file
+      run: |
+        mkdir -p test-upload
+        echo "Test S3 Upload" > test-upload/test.txt
+        echo "Timestamp: $(date)" >> test-upload/test.txt
+        echo "Message: ${{ github.event.inputs.test_message }}" >> test-upload/test.txt
+        echo "Run ID: ${{ github.run_id }}" >> test-upload/test.txt
+        echo "Repository: ${{ github.repository }}" >> test-upload/test.txt
+
+        echo "=== Test file created ==="
+        cat test-upload/test.txt
+        echo "======================="
+
+    - name: Debug AWS secrets
+      run: |
+        echo "Checking if AWS secrets are configured..."
+
+        # Check AWS_ACCESS_KEY_ID
+        if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+          echo "❌ AWS_ACCESS_KEY_ID is not set"
+        else
+          AWS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}"
+          KEY_LENGTH=$(echo -n "$AWS_KEY" | wc -c)
+          echo "✅ AWS_ACCESS_KEY_ID is set (length: $KEY_LENGTH)"
+          FIRST_CHARS=$(echo "$AWS_KEY" | cut -c1-4)
+          echo "   First 4 chars: $FIRST_CHARS..."
+        fi
+
+        # Check AWS_SECRET_ACCESS_KEY
+        if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+          echo "❌ AWS_SECRET_ACCESS_KEY is not set"
+        else
+          echo "✅ AWS_SECRET_ACCESS_KEY is set"
+        fi
+
+        # Check AWS_REGION
+        if [ -z "${{ secrets.AWS_REGION }}" ]; then
+          echo "⚠️  AWS_REGION is not set (will use default: us-east-1)"
+        else
+          echo "✅ AWS_REGION is set: ${{ secrets.AWS_REGION }}"
+        fi
+
+        # Check S3_BUCKET_NAME
+        if [ -z "${{ secrets.S3_BUCKET_NAME }}" ]; then
+          echo "❌ S3_BUCKET_NAME is not set"
+        else
+          echo "✅ S3_BUCKET_NAME is set"
+          BUCKET="${{ secrets.S3_BUCKET_NAME }}"
+          BUCKET_LENGTH=$(echo -n "$BUCKET" | wc -c)
+          echo "   Bucket name length: $BUCKET_LENGTH"
+          # Show first and last char to help debug without exposing full name
+          if [ "$BUCKET_LENGTH" -gt 2 ]; then
+            FIRST_CHAR=$(echo "$BUCKET" | cut -c1)
+            LAST_CHAR=$(echo "$BUCKET" | rev | cut -c1)
+            echo "   Bucket pattern: $FIRST_CHAR...$LAST_CHAR"
+          fi
+        fi
+
+    - name: Configure AWS credentials
+      id: aws-creds
+      continue-on-error: true
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+    - name: Test AWS CLI
+      if: steps.aws-creds.outcome == 'success'
+      continue-on-error: true
+      run: |
+        echo "Testing AWS CLI configuration..."
+        aws sts get-caller-identity || echo "Failed to get caller identity"
+
+        echo ""
+        echo "Testing S3 access..."
+        aws s3 ls "s3://${{ secrets.S3_BUCKET_NAME }}/" --max-items 5 || echo "Failed to list bucket contents"
+
+    - name: Upload to S3 - Method 1 - Direct sync
+      if: steps.aws-creds.outcome == 'success'
+      continue-on-error: true
+      run: |
+        BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}"
+
+        # Debug bucket name
+        echo "Bucket name from secret: '$BUCKET_NAME'"
+        NAME_LENGTH=$(echo -n "$BUCKET_NAME" | wc -c)
+        echo "Bucket name length: $NAME_LENGTH"
+
+        if [ -z "$BUCKET_NAME" ]; then
+          echo "❌ Error: S3_BUCKET_NAME is empty"
+          exit 1
+        fi
+
+        # Remove any potential whitespace
+        BUCKET_NAME=$(echo "$BUCKET_NAME" | tr -d '[:space:]')
+        echo "Cleaned bucket name: '$BUCKET_NAME'"
+
+        TEST_PATH="test-uploads/$(date +%Y%m%d-%H%M%S)"
+        echo "Uploading to: s3://$BUCKET_NAME/$TEST_PATH/"
+
+        aws s3 sync test-upload/ "s3://$BUCKET_NAME/$TEST_PATH/" \
+          --delete \
+          --acl public-read \
+          --cache-control "public, max-age=3600"
+
+        echo "✅ Upload successful!"
+        echo "URL: https://$BUCKET_NAME.s3.amazonaws.com/$TEST_PATH/test.txt"
+
+    - name: Upload to S3 - Method 2 - Individual file
+      if: steps.aws-creds.outcome == 'success'
+      continue-on-error: true
+      run: |
+        BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}"
+
+        if [ -z "$BUCKET_NAME" ]; then
+          echo "❌ Error: S3_BUCKET_NAME is empty"
+          exit 1
+        fi
+
+        TEST_FILE="test-file-$(date +%Y%m%d-%H%M%S).txt"
+        echo "Uploading single file as: $TEST_FILE"
+
+        aws s3 cp test-upload/test.txt "s3://$BUCKET_NAME/test-uploads/$TEST_FILE" \
+          --acl public-read \
+          --cache-control "public, max-age=3600"
+
+        echo "✅ Upload successful!"
+        echo "URL: https://$BUCKET_NAME.s3.amazonaws.com/test-uploads/$TEST_FILE"
+
+    - name: Summary
+      if: always()
+      run: |
+        echo "## Test S3 Upload Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ "${{ steps.aws-creds.outcome }}" == "success" ]; then
+          echo "✅ AWS credentials configured successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Failed to configure AWS credentials" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Debug Information" >> $GITHUB_STEP_SUMMARY
+        echo "- Run ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Triggered by: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Timestamp: $(date)" >> $GITHUB_STEP_SUMMARY
