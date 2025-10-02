@@ -9,8 +9,15 @@ export const test = base.extend<AuthFixture>({
   auth: async ({ context }, use) => {
     await use(async () => {
       await context.addCookies([
-        { name: 'session_id', value: '1', path: '/', domain: 'localhost' }
-      ])
+        {
+          name: 'session_id',
+          value: 'test-session-id-for-playwright-tests',
+          path: '/',
+          domain: 'localhost',
+          httpOnly: false,  // Match backend setting
+          sameSite: 'Lax'
+        }
+      ]);
     })
   },
 
