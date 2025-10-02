@@ -120,6 +120,7 @@ jobs:
 
         aws s3 sync test-upload/ "s3://$BUCKET_NAME/$TEST_PATH/" \
           --delete \
+          --acl public-read \
           --cache-control "public, max-age=3600"
 
         echo "✅ Upload successful!"
@@ -140,6 +141,7 @@ jobs:
         echo "Uploading single file as: $TEST_FILE"
 
         aws s3 cp test-upload/test.txt "s3://$BUCKET_NAME/test-uploads/$TEST_FILE" \
+          --acl public-read \
           --cache-control "public, max-age=3600"
 
         echo "✅ Upload successful!"

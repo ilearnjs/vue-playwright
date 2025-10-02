@@ -1,9 +1,10 @@
 name: Playwright Tests
-# on:
-#   push:
-#     branches: [ master ]
-#   pull_request:
-#     branches: [ master ]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -193,6 +194,7 @@ jobs:
         if [ -d "./.tests/test-report" ]; then
           aws s3 sync ./.tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
             --delete \
+            --acl public-read \
             --cache-control "public, max-age=3600"
 
           REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
