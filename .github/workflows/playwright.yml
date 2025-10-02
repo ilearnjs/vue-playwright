@@ -114,7 +114,7 @@ jobs:
 
     - name: Install dependencies
       working-directory: ./fe
-      if: steps.yarn-pr-cache.outputs.cache-hit != 'true'
+      # if: steps.yarn-pr-cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
 
     # - name: Install Playwright browsers and dependencies
