@@ -123,7 +123,22 @@ jobs:
 
     - name: Run Playwright tests
       working-directory: ./fe
-      run: npx playwright test --reporter=html
+      run: npx playwright test
+      # run: |
+      #   echo "Running Playwright tests..."
+      #   npx playwright test
+      #   TEST_EXIT_CODE=$?
+      #   echo "Test exit code: $TEST_EXIT_CODE"
+
+      #   # Check if report was generated
+      #   if [ -d ".tests/test-report" ]; then
+      #     echo "✅ Test report generated at .tests/test-report"
+      #     ls -la .tests/test-report/
+      #   else
+      #     echo "❌ Test report not found at .tests/test-report"
+      #   fi
+
+      #   exit $TEST_EXIT_CODE
       continue-on-error: true
 
     - name: Generate unique report path
