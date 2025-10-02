@@ -34,8 +34,9 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
 
     reply.setCookie('session_id', sessionId, {
       path: '/',
-      httpOnly: true,
+      httpOnly: false,  // Allow JavaScript to read the cookie
       secure: false,
+      sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000
     })
 

@@ -37,8 +37,20 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const initializeAuth = async () => {
-    // Check if session cookie exists before making API call
-    if (!document.cookie.includes('session_id=')) {
+    // Parse cookies properly
+    const getCookie = (name: string): string | null => {
+      const value = `; ${document.cookie}`
+      const parts = value.split(`; ${name}=`)
+      if (parts.length === 2) {
+        return parts.pop()?.split(';').shift() || null
+      }
+      return null
+    }
+
+    // Check if session_id cookie exists and has a value
+    const sessionId = getCookie('session_id')
+    if (!sessionId) {
+      console.log('No session cookie found, skipping auth initialization')
       return
     }
 
