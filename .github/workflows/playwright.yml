@@ -79,7 +79,7 @@ jobs:
           exit 0
         fi
 
-        aws s3 sync playwright-report/ s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/ \
+        aws s3 sync playwright-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
           --delete \
           --cache-control "public, max-age=3600"
 
@@ -206,7 +206,7 @@ jobs:
           exit 0
         fi
 
-        aws s3 sync playwright-report/ s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/ \
+        aws s3 sync playwright-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
           --delete \
           --cache-control "public, max-age=3600"
 
