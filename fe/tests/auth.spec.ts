@@ -1,4 +1,5 @@
 import { test, expect } from './_setup'
+import { generateLoginError } from './mocks'
 
 test.describe('Auth Page Visual Tests', () => {
   test('init state', async ({ page }) => {
@@ -26,9 +27,14 @@ test.describe('Auth Page Visual Tests', () => {
   })
 
   test('error state', async ({ page }) => {
-    await page.routeFromHAR('./tests/hars/auth/auth/login.har', {
-      url: '*/**/api/auth/login',
-    });
+    // Mock failed login response
+    await page.route('*/**/api/auth/login', async (route) => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify(generateLoginError())
+      })
+    })
 
     await page.goto('/auth')
     await page.waitForLoadState('networkidle')
