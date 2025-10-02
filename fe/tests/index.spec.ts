@@ -128,4 +128,18 @@ test.describe('Index Page Visual Tests', () => {
       animations: 'disabled',
     })
   })
+
+  test('delete transaction modal', async ({ page }) => {
+    await page.goto('/')
+    await page.waitForLoadState('networkidle')
+
+    // Click delete button on first transaction
+    await page.locator('[data-testid="transaction-item"]').first().locator('[data-testid="delete-transaction-button"]').click()
+    await page.waitForSelector('[data-testid="delete-modal"]')
+
+    await expect(page).toHaveScreenshot('index-page-delete-modal.png', {
+      fullPage: true,
+      animations: 'disabled',
+    })
+  })
 })

@@ -44,6 +44,7 @@
           </svg>
         </button>
         <button
+          data-testid="delete-transaction-button"
           @click="$emit('delete', transaction)"
           class="p-1 sm:p-1.5 text-gray-400 hover:text-red-600 focus:outline-none focus:text-red-600"
           title="Delete transaction"

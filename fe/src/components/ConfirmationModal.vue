@@ -7,6 +7,7 @@
   >
     <!-- Modal content -->
     <div
+      data-testid="delete-modal"
       class="bg-white rounded-lg p-4 sm:p-6 w-full max-w-sm sm:max-w-md"
       @click.stop
     >
@@ -42,6 +43,7 @@
         </button>
         <button
           type="button"
+          data-testid="confirm-delete-button"
           @click="handleConfirm"
           class="px-4 py-2.5 sm:py-2 text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-sm font-medium"
         >
