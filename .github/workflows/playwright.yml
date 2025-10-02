@@ -43,7 +43,7 @@ jobs:
     - name: Install Playwright browsers and dependencies
       # if: steps.playwright-cache.outputs.cache-hit != 'true'
       working-directory: ./fe
-      run: playwright install --with-deps
+      run: npx playwright install --with-deps
         # npx playwright install
         # npx playwright install-deps
 
