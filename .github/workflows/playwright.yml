@@ -40,15 +40,12 @@ jobs:
       working-directory: ./fe
       run: yarn install --frozen-lockfile
 
-    - name: Install Playwright browsers
+    - name: Install Playwright browsers and dependencies
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       working-directory: ./fe
-      run: npx playwright install --with-deps
-
-    - name: Install Playwright system dependencies
-      if: steps.playwright-cache.outputs.cache-hit == 'true'
-      working-directory: ./fe
-      run: npx playwright install-deps
+      run: |
+        npx playwright install
+        npx playwright install-deps
 
   test:
     if: github.event_name == 'pull_request'
@@ -83,22 +80,20 @@ jobs:
       id: yarn-master-baseline-cache
       with:
         path: master-baseline/fe/node_modules
-        key: yarn-baseline-${{ hashFiles('master-baseline/fe/yarn.lock') }}
+        key: yarn-${{ hashFiles('master-baseline/fe/yarn.lock') }}
+        # key: yarn-baseline-${{ hashFiles('master-baseline/fe/yarn.lock') }}
 
     - name: Install dependencies (master)
       working-directory: master-baseline/fe
       if: steps.yarn-master-baseline-cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
 
-    - name: Install Playwright Browsers (master)
+    - name: Install Playwright browsers and dependencies (master)
       working-directory: master-baseline/fe
       if: steps.playwright-cache.outputs.cache-hit != 'true'
-      run: npx playwright install --with-deps
-
-    - name: Install Playwright system dependencies (master)
-      if: steps.playwright-cache.outputs.cache-hit == 'true'
-      working-directory: master-baseline/fe
-      run: npx playwright install-deps
+      run: |
+        npx playwright install
+        npx playwright install-deps
 
     - name: Generate master snapshots
       working-directory: master-baseline/fe
@@ -124,15 +119,16 @@ jobs:
       if: steps.yarn-pr-cache.outputs.cache-hit != 'true'
       run: yarn install --frozen-lockfile
 
-    - name: Install Playwright Browsers
+    - name: Install Playwright browsers and dependencies
       working-directory: ./fe
-      if: steps.playwright-cache.outputs.cache-hit != 'true'
-      run: npx playwright install --with-deps
-
-    - name: Install Playwright system dependencies
-      if: steps.playwright-cache.outputs.cache-hit == 'true'
-      working-directory: ./fe
-      run: npx playwright install-deps
+      run: |
+        if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
+          echo "Cache miss - installing browsers and dependencies"
+          npx playwright install --with-deps
+        else
+          echo "Cache hit - installing only system dependencies"
+          npx playwright install-deps
+        fi
 
     - name: Run Playwright tests
       working-directory: ./fe
