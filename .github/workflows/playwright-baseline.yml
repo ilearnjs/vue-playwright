@@ -55,8 +55,10 @@ jobs:
       working-directory: ./fe
       run: npx playwright test --update-snapshots
 
-    - name: Cache baseline screenshots
-      uses: actions/cache/save@v4
+    - name: Upload baseline snapshots as artifact
+      uses: actions/upload-artifact@v4
       with:
-        path: fe/.tests/snaps
-        key: playwright-baseline-snapshots
+        name: playwright-baseline-snapshots
+        path: fe/.tests/snaps/
+        retention-days: 90
+        overwrite: true  # Replaces previous artifact with same name
