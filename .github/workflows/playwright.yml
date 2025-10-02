@@ -45,6 +45,11 @@ jobs:
       working-directory: ./fe
       run: npx playwright install --with-deps
 
+    - name: Install Playwright system dependencies
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      working-directory: ./fe
+      run: npx playwright install-deps
+
   test:
     if: github.event_name == 'pull_request'
     timeout-minutes: 60
@@ -78,9 +83,7 @@ jobs:
       id: yarn-master-baseline-cache
       with:
         path: master-baseline/fe/node_modules
-        key: yarn-${{ hashFiles('master-baseline/fe/yarn.lock') }}
-        restore-keys: |
-          yarn-
+        key: yarn-baseline-${{ hashFiles('master-baseline/fe/yarn.lock') }}
 
     - name: Install dependencies (master)
       working-directory: master-baseline/fe
@@ -91,6 +94,11 @@ jobs:
       working-directory: master-baseline/fe
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: npx playwright install --with-deps
+
+    - name: Install Playwright system dependencies (master)
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      working-directory: master-baseline/fe
+      run: npx playwright install-deps
 
     - name: Generate master snapshots
       working-directory: master-baseline/fe
@@ -120,6 +128,11 @@ jobs:
       working-directory: ./fe
       if: steps.playwright-cache.outputs.cache-hit != 'true'
       run: npx playwright install --with-deps
+
+    - name: Install Playwright system dependencies
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      working-directory: ./fe
+      run: npx playwright install-deps
 
     - name: Run Playwright tests
       working-directory: ./fe
