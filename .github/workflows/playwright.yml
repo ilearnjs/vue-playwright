@@ -89,7 +89,7 @@ jobs:
     - name: Install Playwright browsers and dependencies (master)
       working-directory: master-baseline/fe
       # if: steps.playwright-cache.outputs.cache-hit != 'true'
-      run: playwright install --with-deps
+      run: nxp playwright install --with-deps
         # npx playwright install
         # npx playwright install-deps
 
