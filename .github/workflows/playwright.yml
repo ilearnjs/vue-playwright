@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  cache-dependencies:
+  cache-and-test-master:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -46,6 +46,53 @@ jobs:
       run: npx playwright install --with-deps
         # npx playwright install
         # npx playwright install-deps
+
+    - name: Run Playwright tests
+      working-directory: ./fe
+      run: npx playwright test --reporter=html
+      continue-on-error: true
+
+    - name: Generate report path
+      id: report-path
+      run: |
+        REPORT_PATH="main/$(date +%Y%m%d-%H%M%S)"
+        echo "path=$REPORT_PATH" >> $GITHUB_OUTPUT
+        echo "Report path: $REPORT_PATH"
+
+    # Deploy to S3 if configured (will skip if secrets are not set)
+    - name: Configure AWS credentials
+      id: aws-creds
+      continue-on-error: true
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+    - name: Upload report to S3
+      if: steps.aws-creds.outcome == 'success'
+      working-directory: ./fe
+      run: |
+        # Check if bucket name is provided
+        if [ -z "${{ secrets.S3_BUCKET_NAME }}" ]; then
+          echo "S3_BUCKET_NAME secret not set, skipping S3 upload"
+          exit 0
+        fi
+
+        aws s3 sync playwright-report/ s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/ \
+          --delete \
+          --cache-control "public, max-age=3600"
+
+        REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
+        echo "📊 Master branch report available at: $REPORT_URL"
+
+    - name: Upload test report artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-master-${{ github.sha }}
+        path: fe/playwright-report/
+        retention-days: 30
 
   test:
     if: github.event_name == 'pull_request'
@@ -123,12 +170,70 @@ jobs:
 
     - name: Run Playwright tests
       working-directory: ./fe
-      run: npx playwright test
+      run: npx playwright test --reporter=html
+      continue-on-error: true
 
+    - name: Generate unique report path
+      if: always()
+      id: report-path
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          REPORT_PATH="pr-${{ github.event.pull_request.number }}/$(date +%Y%m%d-%H%M%S)"
+        else
+          REPORT_PATH="main/$(date +%Y%m%d-%H%M%S)"
+        fi
+        echo "path=$REPORT_PATH" >> $GITHUB_OUTPUT
+        echo "Report path: $REPORT_PATH"
+
+    # Deploy to S3 if credentials are configured (will skip if secrets are not set)
+    - name: Configure AWS credentials
+      if: always()
+      id: aws-creds-pr
+      continue-on-error: true
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+    - name: Upload report to S3
+      if: always() && steps.aws-creds-pr.outcome == 'success'
+      working-directory: ./fe
+      run: |
+        # Check if bucket name is provided
+        if [ -z "${{ secrets.S3_BUCKET_NAME }}" ]; then
+          echo "S3_BUCKET_NAME secret not set, skipping S3 upload"
+          exit 0
+        fi
+
+        aws s3 sync playwright-report/ s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/ \
+          --delete \
+          --cache-control "public, max-age=3600"
+
+        REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
+        echo "📊 S3 Report URL: $REPORT_URL"
+        echo "S3_REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+
+    # Always upload as artifact (fallback if S3 is not configured)
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
+      if: always()
       with:
-        name: playwright-report
-        path: fe/.tests/test-report/
+        name: playwright-report-${{ github.event.pull_request.number || github.sha }}
+        path: fe/playwright-report/
         retention-days: 30
+
+    - name: Add report info to summary
+      if: always()
+      run: |
+        echo "## 📊 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+
+        # Add S3 link if available
+        if [ ! -z "${{ env.S3_REPORT_URL }}" ]; then
+          echo "### 🔗 [View Report Online](${{ env.S3_REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "### 📦 Artifact" >> $GITHUB_STEP_SUMMARY
+        echo "Test report has been uploaded as an artifact." >> $GITHUB_STEP_SUMMARY
+        echo "Download from the Actions tab to view locally." >> $GITHUB_STEP_SUMMARY
