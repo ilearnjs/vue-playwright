@@ -1,6 +1,8 @@
 name: Test S3 Upload
 
 on:
+  push:
+    branches: [ '**' ]  # Runs on any branch
   workflow_dispatch:
     inputs:
       test_message:
