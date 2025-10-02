@@ -153,19 +153,39 @@ jobs:
       if: always() && steps.aws-creds-pr.outcome == 'success'
       working-directory: ./fe
       run: |
+        # Debug: Show current directory and structure
+        echo "Current directory: $(pwd)"
+        echo "Directory contents:"
+        ls -la
+        echo "Checking for test report directory:"
+        if [ -d ".tests/test-report" ]; then
+          echo "✅ Found .tests/test-report"
+          echo "Report contents:"
+          ls -la .tests/test-report/ || true
+        else
+          echo "❌ .tests/test-report not found"
+          echo "Checking .tests directory:"
+          ls -la .tests/ 2>/dev/null || echo ".tests directory not found"
+        fi
+
         # Check if bucket name is provided
         if [ -z "${{ secrets.S3_BUCKET_NAME }}" ]; then
           echo "S3_BUCKET_NAME secret not set, skipping S3 upload"
           exit 0
         fi
 
-        aws s3 sync .tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
-          --delete \
-          --cache-control "public, max-age=3600"
+        # Only sync if the directory exists
+        if [ -d ".tests/test-report" ]; then
+          aws s3 sync .tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
+            --delete \
+            --cache-control "public, max-age=3600"
 
-        REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
-        echo "📊 S3 Report URL: $REPORT_URL"
-        echo "S3_REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+          REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
+          echo "📊 S3 Report URL: $REPORT_URL"
+          echo "S3_REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+        else
+          echo "⚠️ Test report directory not found, skipping S3 upload"
+        fi
 
     # Always upload as artifact (fallback if S3 is not configured)
     - name: Upload test report artifact
@@ -175,6 +195,7 @@ jobs:
         name: playwright-report-${{ github.event.pull_request.number || github.sha }}
         path: fe/.tests/test-report/
         retention-days: 30
+        if-no-files-found: warn
 
     - name: Add report info to summary
       if: always()
