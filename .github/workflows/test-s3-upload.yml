@@ -36,9 +36,11 @@ jobs:
         if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
           echo "❌ AWS_ACCESS_KEY_ID is not set"
         else
-          echo "✅ AWS_ACCESS_KEY_ID is set (length: ${#AWS_KEY})"
           AWS_KEY="${{ secrets.AWS_ACCESS_KEY_ID }}"
-          echo "   First 4 chars: ${AWS_KEY:0:4}..."
+          KEY_LENGTH=$(echo -n "$AWS_KEY" | wc -c)
+          echo "✅ AWS_ACCESS_KEY_ID is set (length: $KEY_LENGTH)"
+          FIRST_CHARS=$(echo "$AWS_KEY" | cut -c1-4)
+          echo "   First 4 chars: $FIRST_CHARS..."
         fi
 
         # Check AWS_SECRET_ACCESS_KEY
@@ -61,10 +63,13 @@ jobs:
         else
           echo "✅ S3_BUCKET_NAME is set"
           BUCKET="${{ secrets.S3_BUCKET_NAME }}"
-          echo "   Bucket name length: ${#BUCKET}"
+          BUCKET_LENGTH=$(echo -n "$BUCKET" | wc -c)
+          echo "   Bucket name length: $BUCKET_LENGTH"
           # Show first and last char to help debug without exposing full name
-          if [ ${#BUCKET} -gt 2 ]; then
-            echo "   Bucket pattern: ${BUCKET:0:1}...${BUCKET: -1}"
+          if [ "$BUCKET_LENGTH" -gt 2 ]; then
+            FIRST_CHAR=$(echo "$BUCKET" | cut -c1)
+            LAST_CHAR=$(echo "$BUCKET" | rev | cut -c1)
+            echo "   Bucket pattern: $FIRST_CHAR...$LAST_CHAR"
           fi
         fi
 
@@ -96,7 +101,8 @@ jobs:
 
         # Debug bucket name
         echo "Bucket name from secret: '$BUCKET_NAME'"
-        echo "Bucket name length: ${#BUCKET_NAME}"
+        NAME_LENGTH=$(echo -n "$BUCKET_NAME" | wc -c)
+        echo "Bucket name length: $NAME_LENGTH"
 
         if [ -z "$BUCKET_NAME" ]; then
           echo "❌ Error: S3_BUCKET_NAME is empty"
