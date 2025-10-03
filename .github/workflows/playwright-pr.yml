@@ -90,13 +90,6 @@ jobs:
           echo "❌ Test report not found at .tests/test-report"
         fi
 
-        # Add annotation based on test results
-        if [ $TEST_EXIT_CODE -eq 0 ]; then
-          echo "::notice title=✅ Playwright Tests::All tests passed successfully"
-        else
-          echo "::error title=❌ Playwright Tests Failed::Some tests failed. Check the report for details."
-        fi
-
         exit $TEST_EXIT_CODE
 
     - name: Generate unique report path
@@ -153,8 +146,6 @@ jobs:
         echo "📊 Report URL: $REPORT_URL"
         echo "REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
 
-        # Add report URL as job annotation (notice level)
-        echo "::notice title=Playwright Test Report::View test results at $REPORT_URL"
 
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
