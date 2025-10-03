@@ -135,9 +135,18 @@ jobs:
           --delete \
           --cache-control "public, max-age=3600"
 
-        REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
-        echo "📊 S3 Report URL: $REPORT_URL"
-        echo "S3_REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+        # Generate CloudFront URL
+        if [ ! -z "${{ secrets.CLOUDFRONT_CUSTOM_DOMAIN }}" ]; then
+          REPORT_URL="https://${{ secrets.CLOUDFRONT_CUSTOM_DOMAIN }}/${{ steps.report-path.outputs.path }}/index.html"
+        elif [ ! -z "${{ secrets.CLOUDFRONT_DOMAIN }}" ]; then
+          REPORT_URL="https://${{ secrets.CLOUDFRONT_DOMAIN }}/${{ steps.report-path.outputs.path }}/index.html"
+        else
+          echo "⚠️ CloudFront domain not configured"
+          exit 1
+        fi
+
+        echo "📊 Report URL: $REPORT_URL"
+        echo "REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
 
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
@@ -154,9 +163,9 @@ jobs:
         echo "## 📊 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
-        # Add S3 link if available
-        if [ ! -z "${{ env.S3_REPORT_URL }}" ]; then
-          echo "### 🔗 [View Report Online](${{ env.S3_REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
+        # Add report link if available
+        if [ ! -z "${{ env.REPORT_URL }}" ]; then
+          echo "### 🔗 [View Report Online](${{ env.REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
         fi
 
