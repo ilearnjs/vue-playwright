@@ -133,10 +133,9 @@ jobs:
           exit 0
         fi
 
-        # Upload to S3
+        # Upload to S3 (without ACL - bucket must have public access policy configured)
         aws s3 sync ./.tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
           --delete \
-          --acl public-read \
           --cache-control "public, max-age=3600"
 
         REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
