@@ -63,7 +63,6 @@ jobs:
         path: fe/.tests/snaps/
         branch: master
         search_artifacts: true
-      continue-on-error: true
 
     - name: Verify baseline snapshots
       run: |
@@ -92,7 +91,6 @@ jobs:
         fi
 
         exit $TEST_EXIT_CODE
-      continue-on-error: true
 
     - name: Generate unique report path
       if: always()
@@ -105,7 +103,6 @@ jobs:
     - name: Configure AWS credentials
       if: always()
       id: aws-creds
-      continue-on-error: true
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
