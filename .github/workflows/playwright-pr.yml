@@ -1,0 +1,168 @@
+name: Playwright PR Tests
+
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22.18.0
+
+    - name: Cache yarn dependencies
+      uses: actions/cache@v4
+      id: yarn-cache
+      with:
+        path: fe/node_modules
+        key: yarn-${{ hashFiles('fe/yarn.lock') }}
+        restore-keys: |
+          yarn-
+
+    - name: Install dependencies
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
+      working-directory: ./fe
+      run: yarn install --frozen-lockfile
+
+    - name: Cache Playwright browsers
+      uses: actions/cache@v4
+      id: playwright-cache
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('fe/yarn.lock') }}
+        restore-keys: |
+          playwright-${{ runner.os }}-
+
+    - name: Install Playwright browsers and dependencies
+      working-directory: ./fe
+      run: |
+        if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
+          echo "Cache miss - installing browsers and dependencies"
+          npx playwright install --with-deps
+        else
+          echo "Cache hit - installing only system dependencies"
+          npx playwright install-deps
+        fi
+
+    - name: Download baseline snapshots from master workflow
+      uses: dawidd6/action-download-artifact@v6
+      with:
+        workflow: playwright-baseline.yml
+        name: playwright-baseline-snapshots
+        path: fe/.tests/snaps/
+        branch: master
+        search_artifacts: true
+      continue-on-error: true
+
+    - name: Verify baseline snapshots
+      run: |
+        if [ -d "fe/.tests/snaps" ] && [ "$(ls -A fe/.tests/snaps)" ]; then
+          echo "✅ Baseline snapshots downloaded"
+          echo "Snapshots found:"
+          find fe/.tests/snaps -type f | head -10
+        else
+          echo "⚠️ No baseline snapshots found - tests will generate new ones"
+        fi
+
+    - name: Run Playwright tests
+      working-directory: ./fe
+      run: |
+        echo "Running Playwright tests..."
+        npx playwright test
+        TEST_EXIT_CODE=$?
+        echo "Test exit code: $TEST_EXIT_CODE"
+
+        # Check if report was generated
+        if [ -d ".tests/test-report" ]; then
+          echo "✅ Test report generated at .tests/test-report"
+          ls -la .tests/test-report/
+        else
+          echo "❌ Test report not found at .tests/test-report"
+        fi
+
+        exit $TEST_EXIT_CODE
+      continue-on-error: true
+
+    - name: Generate unique report path
+      if: always()
+      id: report-path
+      run: |
+        REPORT_PATH="pr-${{ github.event.pull_request.number }}/$(date +%Y%m%d-%H%M%S)"
+        echo "path=$REPORT_PATH" >> $GITHUB_OUTPUT
+        echo "Report path: $REPORT_PATH"
+
+    - name: Configure AWS credentials
+      if: always()
+      id: aws-creds
+      continue-on-error: true
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+    - name: Upload report to S3
+      if: always() && steps.aws-creds.outcome == 'success'
+      working-directory: ./fe
+      run: |
+        # Debug: Show current directory and structure
+        echo "Current directory: $(pwd)"
+        echo "Checking for test report directory:"
+        if [ -d ".tests/test-report" ]; then
+          echo "✅ Found .tests/test-report"
+        else
+          echo "❌ .tests/test-report not found"
+          echo "Skipping S3 upload"
+          exit 0
+        fi
+
+        # Check if bucket name is provided
+        if [ -z "${{ secrets.S3_BUCKET_NAME }}" ]; then
+          echo "S3_BUCKET_NAME secret not set, skipping S3 upload"
+          exit 0
+        fi
+
+        # Upload to S3 (without ACL - bucket must have public access policy configured)
+        aws s3 sync ./.tests/test-report/ "s3://${{ secrets.S3_BUCKET_NAME }}/playwright-reports/${{ steps.report-path.outputs.path }}/" \
+          --delete \
+          --cache-control "public, max-age=3600"
+
+        REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
+        echo "📊 S3 Report URL: $REPORT_URL"
+        echo "S3_REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+
+    - name: Upload test report artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report-${{ github.event.pull_request.number || github.sha }}
+        path: fe/.tests/test-report/
+        retention-days: 30
+        if-no-files-found: warn
+
+    - name: Add report info to summary
+      if: always()
+      run: |
+        echo "## 📊 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Add S3 link if available
+        if [ ! -z "${{ env.S3_REPORT_URL }}" ]; then
+          echo "### 🔗 [View Report Online](${{ env.S3_REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        echo "### 📦 Artifact" >> $GITHUB_STEP_SUMMARY
+        echo "Test report has been uploaded as an artifact." >> $GITHUB_STEP_SUMMARY
+        echo "Download from the Actions tab to view locally." >> $GITHUB_STEP_SUMMARY
