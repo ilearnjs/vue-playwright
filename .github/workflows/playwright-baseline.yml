@@ -53,14 +53,13 @@ jobs:
         fi
 
     - name: Generate baseline screenshots
-      run: |
-        npx playwright test --update-snapshots
+      run: npx playwright test --update-snapshots
 
     - name: Upload baseline snapshots as artifact
       uses: actions/upload-artifact@v4
       with:
         name: playwright-baseline-snapshots
-        path: .tests/snaps/
+        path: fe/.tests/snaps/
         retention-days: 60
         overwrite: true
 
