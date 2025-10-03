@@ -92,7 +92,7 @@ jobs:
         fi
 
         exit $TEST_EXIT_CODE
-      continue-on-error: true
+      # continue-on-error: true
 
     - name: Generate unique report path
       if: always()
