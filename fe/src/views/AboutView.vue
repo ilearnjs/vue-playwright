@@ -132,6 +132,29 @@
         </div>
       </section>
 
+      <section class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg shadow-sm border border-indigo-200 p-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-4">Our Commitment to You</h2>
+        <p class="text-gray-700 leading-relaxed mb-6">
+          At FinanceTracker, we're committed to your financial success. Our platform is built with transparency,
+          security, and your privacy in mind. We never sell your data, and our pricing is straightforward with
+          no hidden fees. Join thousands of users who have transformed their financial lives with our tools.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="text-3xl font-bold text-indigo-600 mb-1">100K+</div>
+            <p class="text-sm text-gray-600">Active Users</p>
+          </div>
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="text-3xl font-bold text-indigo-600 mb-1">$2B+</div>
+            <p class="text-sm text-gray-600">Money Managed</p>
+          </div>
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div class="text-3xl font-bold text-indigo-600 mb-1">4.9/5</div>
+            <p class="text-sm text-gray-600">User Rating</p>
+          </div>
+        </div>
+      </section>
+
       <section class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <h2 class="text-2xl font-semibold text-gray-900 mb-6">Getting Started</h2>
         <div class="space-y-4">
