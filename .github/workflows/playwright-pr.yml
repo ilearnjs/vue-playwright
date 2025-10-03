@@ -75,6 +75,7 @@ jobs:
         fi
 
     - name: Run Playwright tests
+      id: test
       working-directory: ./fe
       run: |
         echo "Running Playwright tests..."
@@ -135,9 +136,17 @@ jobs:
           --delete \
           --cache-control "public, max-age=3600"
 
-        REPORT_URL="https://${{ secrets.S3_BUCKET_NAME }}.s3.amazonaws.com/playwright-reports/${{ steps.report-path.outputs.path }}/index.html"
-        echo "📊 S3 Report URL: $REPORT_URL"
-        echo "S3_REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+        # Generate CloudFront URL
+        if [ ! -z "${{ vars.CLOUDFRONT_DOMAIN }}" ]; then
+          REPORT_URL="https://${{ vars.CLOUDFRONT_DOMAIN }}/${{ steps.report-path.outputs.path }}/index.html"
+        else
+          echo "⚠️ CloudFront domain not configured"
+          exit 1
+        fi
+
+        echo "📊 Report URL: $REPORT_URL"
+        echo "REPORT_URL=$REPORT_URL" >> $GITHUB_ENV
+
 
     - name: Upload test report artifact
       uses: actions/upload-artifact@v4
@@ -154,12 +163,17 @@ jobs:
         echo "## 📊 Playwright Test Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
-        # Add S3 link if available
-        if [ ! -z "${{ env.S3_REPORT_URL }}" ]; then
-          echo "### 🔗 [View Report Online](${{ env.S3_REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
+        # Test result summary
+        if [ "${{ steps.test.outcome }}" == "success" ]; then
+          echo "### ✅ All tests passed successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### ❌ Some tests failed. Check the report for details." >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        # Add report link if available
+        if [ ! -z "${{ env.REPORT_URL }}" ]; then
+          echo "### 🔗 [View Report Online](${{ env.REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
         fi
 
-        echo "### 📦 Artifact" >> $GITHUB_STEP_SUMMARY
-        echo "Test report has been uploaded as an artifact." >> $GITHUB_STEP_SUMMARY
-        echo "Download from the Actions tab to view locally." >> $GITHUB_STEP_SUMMARY
