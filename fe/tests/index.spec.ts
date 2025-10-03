@@ -43,7 +43,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.waitForSelector('[data-testid="income-modal"]')
 
     await expect(page).toHaveScreenshot('index-page-income-modal.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
@@ -60,7 +59,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.getByTestId('transaction-amount-input').fill('1500.00')
 
     await expect(page).toHaveScreenshot('index-page-income-modal-filled.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
@@ -73,7 +71,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.waitForSelector('[data-testid="expense-modal"]')
 
     await expect(page).toHaveScreenshot('index-page-expense-modal.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
@@ -90,7 +87,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.getByTestId('transaction-amount-input').fill('2500.00')
 
     await expect(page).toHaveScreenshot('index-page-expense-modal-filled.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
@@ -104,7 +100,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.waitForSelector('[data-testid="edit-modal"]')
 
     await expect(page).toHaveScreenshot('index-page-edit-modal.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
@@ -124,7 +119,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.getByTestId('transaction-amount-input').fill('3750.50')
 
     await expect(page).toHaveScreenshot('index-page-edit-modal-modified.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
@@ -138,7 +132,6 @@ test.describe('Index Page Visual Tests', () => {
     await page.waitForSelector('[data-testid="delete-modal"]')
 
     await expect(page).toHaveScreenshot('index-page-delete-modal.png', {
-      fullPage: true,
       animations: 'disabled',
     })
   })
