@@ -55,13 +55,22 @@ jobs:
           npx playwright install-deps
         fi
 
-    - name: Restore baseline snapshots
-      uses: actions/cache/restore@v4
+    - name: Download baseline snapshots from artifacts
+      uses: actions/download-artifact@v4
       with:
-        path: fe/.tests/snaps
-        key: playwright-snapshots-${{ github.event.pull_request.base.sha }}
-        restore-keys: |
-          playwright-snapshots-
+        name: playwright-baseline-snapshots
+        path: fe/.tests/snaps/
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Verify baseline snapshots
+      run: |
+        if [ -d "fe/.tests/snaps" ] && [ "$(ls -A fe/.tests/snaps)" ]; then
+          echo "✅ Baseline snapshots downloaded"
+          echo "Snapshots found:"
+          find fe/.tests/snaps -type f | head -10
+        else
+          echo "⚠️ No baseline snapshots found - tests will generate new ones"
+        fi
 
     - name: Run Playwright tests
       working-directory: ./fe
