@@ -2,9 +2,9 @@
   <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="text-center mb-12">
       <h1 class="text-4xl font-bold text-gray-900 mb-4">About FinanceTracker</h1>
-      <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+      <!-- <p class="text-xl text-gray-600 max-w-2xl mx-auto">
         Take control of your financial future with our comprehensive personal finance management platform designed to help you budget, save, and achieve your financial goals.
-      </p>
+      </p> -->
     </div>
 
     <div class="space-y-12">
