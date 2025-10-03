@@ -136,10 +136,8 @@ jobs:
           --cache-control "public, max-age=3600"
 
         # Generate CloudFront URL
-        if [ ! -z "${{ secrets.CLOUDFRONT_CUSTOM_DOMAIN }}" ]; then
-          REPORT_URL="https://${{ secrets.CLOUDFRONT_CUSTOM_DOMAIN }}/${{ steps.report-path.outputs.path }}/index.html"
-        elif [ ! -z "${{ secrets.CLOUDFRONT_DOMAIN }}" ]; then
-          REPORT_URL="https://${{ secrets.CLOUDFRONT_DOMAIN }}/${{ steps.report-path.outputs.path }}/index.html"
+        if [ ! -z "${{ vars.CLOUDFRONT_DOMAIN }}" ]; then
+          REPORT_URL="https://${{ vars.CLOUDFRONT_DOMAIN }}/${{ steps.report-path.outputs.path }}/index.html"
         else
           echo "⚠️ CloudFront domain not configured"
           exit 1
