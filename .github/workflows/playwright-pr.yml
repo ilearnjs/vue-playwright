@@ -55,12 +55,15 @@ jobs:
           npx playwright install-deps
         fi
 
-    - name: Download baseline snapshots from artifacts
-      uses: actions/download-artifact@v4
+    - name: Download baseline snapshots from master workflow
+      uses: dawidd6/action-download-artifact@v6
       with:
+        workflow: playwright-baseline.yml
         name: playwright-baseline-snapshots
         path: fe/.tests/snaps/
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        branch: master
+        search_artifacts: true
+      continue-on-error: true
 
     - name: Verify baseline snapshots
       run: |
