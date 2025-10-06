@@ -49,10 +49,10 @@ jobs:
       run: |
         if [ "${{ steps.playwright-cache.outputs.cache-hit }}" != "true" ]; then
           echo "Cache miss - installing browsers and dependencies"
-          npx playwright install --with-deps
+          npx playwright install --with-deps > /dev/null # --quiet
         else
           echo "Cache hit - installing only system dependencies"
-          npx playwright install-deps
+          npx playwright install-deps > /dev/null # --quiet
         fi
 
     - name: Download baseline snapshots from master workflow
@@ -71,7 +71,9 @@ jobs:
           echo "Snapshots found:"
           find fe/.tests/snaps -type f | head -10
         else
-          echo "⚠️ No baseline snapshots found - tests will generate new ones"
+          echo "❌ Baseline snapshots not found or empty"
+          echo "Skipping tests as baseline is required"
+          exit 0
         fi
 
     - name: Run Playwright tests
@@ -176,4 +178,3 @@ jobs:
           echo "### 🔗 [View Report Online](${{ env.REPORT_URL }})" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
         fi
-
