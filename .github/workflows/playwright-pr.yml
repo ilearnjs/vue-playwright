@@ -3,6 +3,11 @@ name: Playwright PR Tests
 on:
   pull_request:
     branches: [ master ]
+  workflow_run:
+    workflows: ["Playwright Baseline"]
+    types:
+      - completed
+    branches: [ master ]
   workflow_dispatch:
 
 permissions:
