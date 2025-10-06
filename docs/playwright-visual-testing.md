@@ -55,7 +55,7 @@ We use two complementary approaches for mocking API responses in our visual test
 3. **Replay**: Tests use these HAR files to mock all network requests consistently
 4. **Maintenance**: Update HAR files when API contracts change
 
-#### 2. Faker Library (Alternative Approach) (check branch: (C-mock)[https://github.com/ilearnjs/vue-playwright/tree/C_mock])
+#### 2. Faker Library (Alternative Approach) (check branch: [C-mock](https://github.com/ilearnjs/vue-playwright/tree/C_mock))
 
 For more flexible and programmatic mock data generation, we use the **@faker-js/faker** library.
 
