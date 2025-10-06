@@ -32,9 +32,13 @@ We chose to mock all backend interactions for several key reasons:
 2. **Mock Maintenance**: API contract changes require updating mock data
 3. **Limited Real-World Scenarios**: Some dynamic behaviors and edge cases may not be fully represented
 
-### Data Mocking Approach - HAR Files
+### Data Mocking Approaches
 
-We use **HAR (HTTP Archive)** files for mocking API responses. HAR is a JSON-formatted archive file format for logging a web browser's interaction with a site.
+We use two complementary approaches for mocking API responses in our visual tests:
+
+#### 1. HAR Files (Primary Approach)
+
+**HAR (HTTP Archive)** files are JSON-formatted archives that record browser's interactions with a site.
 
 **Why HAR Files?**
 - **Minimal Setup**: No need for complex mock servers or third-party mocking libraries
@@ -50,6 +54,36 @@ We use **HAR (HTTP Archive)** files for mocking API responses. HAR is a JSON-for
 2. **Storage**: HAR files are stored in the test directory and committed to the repository
 3. **Replay**: Tests use these HAR files to mock all network requests consistently
 4. **Maintenance**: Update HAR files when API contracts change
+
+#### 2. Faker Library (Alternative Approach) (check branch: (C-mock)[https://github.com/ilearnjs/vue-playwright/tree/C_mock])
+
+For more flexible and programmatic mock data generation, we use the **@faker-js/faker** library.
+
+**Why Faker?**
+- **Programmatic Control**: Generate data dynamically with full control over values and patterns
+- **Type Safety**: Strongly typed mock data that matches TypeScript interfaces
+- **Deterministic Output**: Seeded random generation ensures consistent data across test runs
+- **No Recording Required**: Pure code-based approach, no need to capture real API responses
+- **Easy Customization**: Override specific fields while keeping other data consistent
+- **Rapid Prototyping**: Create mocks before backend APIs are implemented
+
+**How We Use Faker:**
+1. **Seeded Generation**: All mock files use `faker.seed(123)` for reproducible data
+2. **Domain Organization**: Mock functions separated by feature (auth, transactions, dashboard)
+3. **Type Integration**: Generated data matches API TypeScript interfaces
+4. **Route Interception**: Used with Playwright's `page.route()` to mock API responses
+
+**When to Use Each Approach:**
+- **Use HAR files** when:
+  - You need exact production API responses
+  - Working with complex third-party APIs
+  - Testing specific edge cases from production
+
+- **Use Faker** when:
+  - Building tests before backend implementation
+  - Need programmatic control over test data
+  - Testing various data scenarios systematically
+  - Working with simple, well-defined data structures
 
 ### Testing Architecture
 
