@@ -136,3 +136,5 @@ Our CI/CD pipeline consists of two main workflows:
 - **Purpose**: Provides access to test reports
 - **Key Benefits**:
   - Secure public sharing without exposing S3 bucket directly
+
+### TODO: add info about tracing (page full screen view)
