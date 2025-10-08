@@ -68,7 +68,7 @@ const projectsFirefox = [
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
   workers: undefined,
@@ -77,11 +77,11 @@ export default defineConfig({
     trace: 'on'
   },
 
-  outputDir: '.tests/test-results/',
-  snapshotPathTemplate: '.tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
+  outputDir: './.tests/test-results/',
+  snapshotPathTemplate: './.tests/snaps/{testFilePath}/{arg}-{projectName}-{platform}{ext}',
   reporter: [
     ['html', {
-      outputFolder: '.tests/test-report',
+      outputFolder: './.tests/test-report',
       open: 'never'
     }],
     process.env.CI ? ['github'] : ['line'],
@@ -96,6 +96,5 @@ export default defineConfig({
   webServer: {
     command: 'yarn dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI
   }
 })
