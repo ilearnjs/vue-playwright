@@ -99,14 +99,14 @@ test.describe("Index Page Visual Tests", () => {
 });
 ```
 
-[!IMPORTANT]
-After backend changes HAR files should be updated by running tests with `update: true` option.
+> [!NOTE]
+> After backend changes HAR files should be updated by running tests with `update: true` option.
 
-[!IMPORTANT]
-After recording HAR files make sure to set `update` option to `false` or remove it completely.
+> [!NOTE]
+>After recording HAR files make sure to set `update` option to `false` or remove it completely.
 
-[!IMPORTANT]
-HAR files shouldn't be gitignored.
+> [!NOTE]
+> HAR files shouldn't be gitignored.
 
 ### Alternative mocking approach
 
@@ -137,8 +137,8 @@ export function generateUser(): User {
 }
 ```
 
-[!IMPORTANT]
-Use types from your app to type mock data.
+> [!NOTE]
+> Use types from your app to type mock data.
 
 ## Setup CI workflow
 
@@ -181,15 +181,15 @@ Description of the workflow steps:
 - Upload test report
 - Generate summary
 
-[!IMPORTANT]
-This workflow will not work for free private repositories.
+> [!NOTE]
+> This workflow will not work for free private repositories.
 
 ## AWS setup
 
 To make HTML reports accessible, we upload them to S3 and use CloudFront to deliver them.
 
-[!IMPORTANT]
-Many platforms can be used (Azure, Google Cloud, Netlify, etc.). We use Amazon AWS as an example. Cloud platforms like AWS, Azure, or Google Cloud provide more flexibility than platforms like Netlify but require additional configuration. Choose what works best for you.
+> [!NOTE]
+> Many platforms can be used (Azure, Google Cloud, Netlify, etc.). We use Amazon AWS as an example. Cloud platforms like AWS, Azure, or Google Cloud provide more flexibility than platforms like Netlify but require additional configuration. Choose what works best for you.
 
 ### S3 setup
 
@@ -233,11 +233,11 @@ To automatically delete old test reports and save storage costs:
 
 6. Click **"Create rule"**
 
-[!IMPORTANT]
-This will permanently delete reports after the specified period. Adjust the retention period based on your team's needs. Common settings:
-- 7 days for feature branch PRs
-- 30 days for main branch reports
-- 90 days for release reports
+> [!NOTE]
+> This will permanently delete reports after the specified period. Adjust the retention period based on your team's needs. Common settings:
+> - 7 days for feature branch PRs
+> - 30 days for main branch reports
+> - 90 days for release reports
 
 ### CloudFront setup
 
@@ -283,8 +283,8 @@ Add following variables to your repository:
 
 - CLOUDFRONT_URL - URL of the CloudFront distribution
 
-[!IMPORTANT]
-It is not a good idea to share an AWS S3 bucket URL publicly. Instead, we suggest using CloudFront.
+> [!WARNING]
+> It is not a good idea to share an AWS S3 bucket URL publicly. Instead, we suggest using CloudFront.
 
 ### Tips
 
