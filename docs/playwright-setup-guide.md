@@ -3,17 +3,22 @@
 This guide walks you through setting up Playwright for visual regression testing in an existing project, following the approach used in this repository.
 
 ## Table of Contents
+1. [Prerequisites](#prerequisites)
+2. [Installation](#installation)
+3. [Mocking data](#step-3-mocking-data)
+4. [Setup CI workflow](#step-4-setup-ci-workflow)
+5. [AWS setup](#step-5-aws-setup)
+6. [Tips](#tips)
 
 ## Prerequisites
 
-- Web app we want to test (locally runnable)
-- Access to staging api (for HAR recording)s
+- A web application that can be run locally
+- Access to staging API (for HAR recording)
 
-## Installation
+## Install and configure Playwright
 
-### Step 1: Install and configure Playwright
 
-Note: the recommended location to install Playwright is in the root of your frontend project. Alternatively it can be installed as a separate package in a monorepo.
+Note: The recommended location to install Playwright is in the root of your frontend project. Alternatively, it can be installed as a separate package in a monorepo.
 
 ```bash
 npm init playwright@latest
@@ -21,7 +26,7 @@ npm init playwright@latest
 
 You can use default options for all steps.
 
-playwright.config updates needed to be done:
+Update your `playwright.config.ts` with the following configuration:
 
 ```ts
 export default defineConfig({
@@ -51,13 +56,13 @@ export default defineConfig({
   ],
   // start web app before tests
   webServer: {
-    command: "npm dev",
+    command: "npm run dev",
     url: "http://localhost:5173",
   },
 });
 ```
 
-### Step 2: Add simple visual test
+## Add simple visual test
 
 ```ts
 import { test, expect } from "@playwright/test";
@@ -70,12 +75,12 @@ test.describe("Index Page Visual Tests", () => {
 });
 ```
 
-### Step 3: Mocking data
+## Mocking data
 
-### Step 3.1: HAR recording
+### HAR recording
 
-To make visual tests independent from backend state we will use HAR recording and routing. The idea is to record all api calls the page makes and route them to HAR file during tests.
-Additional details can be found here [Playwright HAR documentation](https://playwright.dev/docs/mock#mocking-with-har-files).
+To make visual tests independent from backend state, we will use HAR recording and routing. The idea is to record all API calls the page makes and route them to HAR files during tests.
+Additional details can be found in the [Playwright HAR documentation](https://playwright.dev/docs/mock#mocking-with-har-files).
 
 ```ts
 import { test, expect } from "@playwright/test";
@@ -94,16 +99,21 @@ test.describe("Index Page Visual Tests", () => {
 });
 ```
 
-!important: after backend changes HAR files should be updated by running tests with `update: true` option.
-!important: after recording HAR files make sure to set `update` option to `false` or remove it completely.
-!important: HAR files shouldn't be gitignored.
+[!IMPORTANT]
+After backend changes HAR files should be updated by running tests with `update: true` option.
 
-### Step 3.2: Alternative mocking approach
+[!IMPORTANT]
+After recording HAR files make sure to set `update` option to `false` or remove it completely.
+
+[!IMPORTANT]
+HAR files shouldn't be gitignored.
+
+### Alternative mocking approach
 
 Instead of HAR recording you can use manual mocking. The advantage is that you can create different states more easily. The disadvantage is that mocks should be maintained manually.
 
-We suggest to use Faker library to generate mock data.
-Faker allows to generate good looking random data. To make visual tests stable you need to set seed.
+We suggest using the Faker library to generate mock data.
+Faker allows you to generate realistic random data. To make visual tests stable, you need to set a seed.
 
 For more details see [Faker documentation](https://fakerjs.dev/).
 For full example check [PR](https://github.com/ilearnjs/vue-playwright/pull/18).
@@ -127,15 +137,16 @@ export function generateUser(): User {
 }
 ```
 
-!important: use types from your app to type mock data.
+[!IMPORTANT]
+Use types from your app to type mock data.
 
-### Step 4: Setup CI workflow
+## Setup CI workflow
 
-We use Github Actions for CI.
+We use GitHub Actions for CI.
 
-### Step 4.1: Baseline workflow
+### Baseline workflow
 
-Baseline workflow generates baseline snapshots and uploads them as artifacts each time change added to main branch.
+The baseline workflow generates baseline snapshots and uploads them as artifacts each time a change is added to the main branch.
 
 Description of the workflow steps:
 
@@ -149,9 +160,9 @@ Description of the workflow steps:
 - Upload baseline snapshots as artifact - we use GH for storing artifacts
 - Generate summary
 
-### Step 4.2: PR workflow
+### PR workflow
 
-PR workflow compares pr snapshots with baseline each time a pull request is opened or updated or after baseline workflow is completed.
+The PR workflow compares PR snapshots with the baseline each time a pull request is opened, updated, or after the baseline workflow is completed.
 
 Description of the workflow steps:
 
@@ -163,34 +174,36 @@ Description of the workflow steps:
 - Install playwright - if playwright cache hit - fast install, if miss - full install including browser download
 - Download baseline snapshots artifact
 - Verify baseline snapshots are downloaded
-- Tests - compare pr snapshots with baseline
-- Generate unique report path - generate unique path for html report to avoid conflicts
+- Tests - compare PR snapshots with baseline
+- Generate unique report path - generate unique path for HTML report to avoid conflicts
 - Configure AWS credentials
-- Upload report to S3 - upload html report to S3 to make it accessible via public url
+- Upload report to S3 - upload HTML report to S3 to make it accessible via public URL
 - Upload test report
 - Generate summary
 
-!important: this workflow will not work for free private repositories
+[!IMPORTANT]
+This workflow will not work for free private repositories.
 
-### Step 5: AWS setup
+## AWS setup
 
-To make html report accessible we upload it to S3 and use Cloudfront to deliver it.
+To make HTML reports accessible, we upload them to S3 and use CloudFront to deliver them.
 
-!important: a lot of platforms can be used (azure, google cloud, netlify...). We use amazon as an example. Cloud platforms like AWS or azure or google cloud provide more flexibility then platforms like netlify but requires additional configuration. Chose what works best for you.
+[!IMPORTANT]
+Many platforms can be used (Azure, Google Cloud, Netlify, etc.). We use Amazon AWS as an example. Cloud platforms like AWS, Azure, or Google Cloud provide more flexibility than platforms like Netlify but require additional configuration. Choose what works best for you.
 
-### Step 5.1: S3 setup
+### S3 setup
 
 1. Signup/signin to [AWS Management Console](https://console.aws.amazon.com)
 2. Navigate to S3 (search for "S3" in the top search bar)
 3. Click the **"Create bucket"** button
 4. Configure bucket settings:
 
-- **AWS Region**: region can be changed in the right top corner, select region closest to team location
+- **AWS Region**: Select the region closest to your team's location (you can change the region in the top right corner)
 - **Bucket name**: `playwright-reports-yourproject` (must be globally unique)
 - **Object Ownership**: Keep "ACLs disabled" (recommended)
 - **Block Public Access settings**:
-- ✅ Keep all boxes **checked**
-- Click to confirm "Block all public access"
+  - ✅ Keep all boxes **checked**
+  - Click to confirm "Block all public access"
 
 - **Bucket Versioning**:
 
@@ -203,44 +216,36 @@ To make html report accessible we upload it to S3 and use Cloudfront to deliver 
 
 5. Click **"Create bucket"**
 
-### Step 5.2: Cloudfront setup
+### CloudFront setup
 
 1. Signup/signin to [AWS Management Console](https://console.aws.amazon.com)
 
 2. Navigate to CloudFront (search for "CloudFront" in the top search bar)
 
-3. 
-  - **distribution name** - e.g. playwright-reports-distribution
+3. Click **"Create distribution"** and configure:
+   - **Origin domain** - select your S3 bucket from dropdown
+   - **Origin path**: Leave empty
+   - **Name**: Auto-filled (keep as is)
 
-  - **Origin type**: - Amazon S3, `playwright-reports-yourproject.s3.amazonaws.com`
-
-  - **S3 origin** - select your bucket
-
-  - **Origin path**: Leave empty
-
-3. **Name**: Auto-filled (keep as is)
-
-4. **Create S3**:
+4. **Origin Access**:
    - Select **"Yes use OAI (bucket can restrict access to only CloudFront)"**
-   - **Origin access identity**: Select the OAI you created earlier
+   - **Origin access identity**: Create new OAI
    - **Bucket policy**: Select **"Yes, update the bucket policy"**
-   - **Web Application Firewall**: **Do not enable securinty protection** (unless you need extra security)
-5. Click **"Create distribution"**
+
+5. **Web Application Firewall**: **Do not enable security protection** (unless you need extra security)
    
 
-#### Create Distribution:
+6. **Additional Settings**:
 
-1. **Price class**:
-   - **Use only North America and Europe** (for cost savings)
-   - Or **Use all edge locations** (for best performance)
+   **Price class**:
 
-2. **AWS WAF web ACL**: **None** (unless you need extra security)
+   **AWS WAF web ACL**: **None** (unless you need extra security)
 
-3. **Alternate domain name (CNAME)**: Leave empty (unless you have a custom domain)
+   **Alternate domain name (CNAME)**: Leave empty (unless you have a custom domain)
 
-4. **Custom SSL certificate**: Keep default
+   **Custom SSL certificate**: Keep default
 
-5. Go to end and click **"Create distribution"**
+7. Click **"Create distribution"**
 
 ### Step 5.3: GH secrets/variables
 
@@ -255,11 +260,12 @@ Add following secrets to your repository:
 
 Add following variables to your repository:
 
-- CLOUDFRONT_URL - url of the Cloudfront distribution
+- CLOUDFRONT_URL - URL of the CloudFront distribution
 
-!important: that is not a good idea to share aws s3 bucket publicly. Instead we suggests to use CloudFront
+[!IMPORTANT]
+It is not a good idea to share an AWS S3 bucket URL publicly. Instead, we suggest using CloudFront.
 
 ### Tips
 
-- ask AI to write tests (e.g. Claude Code, Codex)
-- do not ask AI to wite all test in one go, do it step by step, test by test, review after each step, ask to make fixes, commit changes, repeat
+- Ask AI to write tests (e.g., Claude Code, Codex)
+- Do not ask AI to write all tests in one go. Instead, proceed step by step, test by test, reviewing after each step, asking for fixes, committing changes, and repeating the process
