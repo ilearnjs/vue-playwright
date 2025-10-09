@@ -133,8 +133,12 @@ Our CI/CD pipeline consists of two main workflows:
 - **Access**: Configured with appropriate IAM policies for GitHub Actions
 
 ### CloudFront CDN
-- **Purpose**: Provides access to test reports
+- **Purpose**: Global content delivery network for test reports
 - **Key Benefits**:
-  - Secure public sharing without exposing S3 bucket directly
+  - **Security**: Prevents direct S3 bucket exposure while enabling public report access
 
-### TODO: add info about tracing (page full screen view)
+## Playwright Tracing
+
+### Full Page Screenshots in Trace Viewer
+
+Playwright's trace viewer provides comprehensive debugging capabilities, including full-page screenshots at each test step. This feature is invaluable for understanding test failures and reviewing UI states.
