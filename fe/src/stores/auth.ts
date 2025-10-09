@@ -37,20 +37,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const initializeAuth = async () => {
-    // Parse cookies properly
-    const getCookie = (name: string): string | null => {
-      const value = `; ${document.cookie}`
-      const parts = value.split(`; ${name}=`)
-      if (parts.length === 2) {
-        return parts.pop()?.split(';').shift() || null
-      }
-      return null
-    }
+    // Check if session_id cookie exists (now possible since httpOnly is false)
+    const cookies = document.cookie.split(';').map(c => c.trim())
+    const sessionCookie = cookies.find(cookie => cookie.startsWith('session_id='))
 
-    // Check if session_id cookie exists and has a value
-    const sessionId = getCookie('session_id')
-    if (!sessionId) {
-      console.log('No session cookie found, skipping auth initialization')
+    // If no session cookie or it's empty, skip API call
+    if (!sessionCookie || sessionCookie === 'session_id=') {
       return
     }
 
@@ -59,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
       const userData = await authApi.getCurrentUser()
       user.value = userData
     } catch (err) {
+      // No valid session or network error - user remains logged out
       user.value = null
     } finally {
       isLoading.value = false
