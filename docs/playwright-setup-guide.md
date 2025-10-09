@@ -216,6 +216,29 @@ Many platforms can be used (Azure, Google Cloud, Netlify, etc.). We use Amazon A
 
 5. Click **"Create bucket"**
 
+### Step 5.1.1: Configure S3 Lifecycle Rules (Optional but Recommended)
+
+To automatically delete old test reports and save storage costs:
+
+1. Open your newly created bucket
+2. Go to the **"Management"** tab
+3. Click **"Create lifecycle rule"**
+4. Configure the rule:
+   - **Lifecycle rule name**: `delete-old-reports`
+   - **Rule scope**: Choose **"Apply to all objects in the bucket"** or use prefix `playwright-reports/` if you organize by folders
+
+5. **Lifecycle rule actions**:
+   - ✅ Check **"Expire current versions of objects"**
+   - Set **"Days after object creation"**: `60` (or your preferred retention period)
+
+6. Click **"Create rule"**
+
+[!IMPORTANT]
+This will permanently delete reports after the specified period. Adjust the retention period based on your team's needs. Common settings:
+- 7 days for feature branch PRs
+- 30 days for main branch reports
+- 90 days for release reports
+
 ### CloudFront setup
 
 1. Signup/signin to [AWS Management Console](https://console.aws.amazon.com)
@@ -224,7 +247,7 @@ Many platforms can be used (Azure, Google Cloud, Netlify, etc.). We use Amazon A
 
 3. Click **"Create distribution"** and configure:
    - **Origin domain** - select your S3 bucket from dropdown
-   - **Origin path**: Leave empty
+   - **Origin path**: Leave empty or set to `/playwright-reports` if you organize reports in a folder
    - **Name**: Auto-filled (keep as is)
 
 4. **Origin Access**:
