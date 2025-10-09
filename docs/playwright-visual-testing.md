@@ -113,12 +113,12 @@ For more flexible and programmatic mock data generation, we use the **@faker-js/
 Our CI/CD pipeline consists of two main workflows:
 
 ### 1. Baseline Generation Workflow (`playwright-baseline.yml`)
-- **Trigger**: Automatically runs when code is pushed to main/master branch
+- **Trigger**: Automatically runs when code is pushed to master branch
 - **Purpose**: Generates reference screenshots for future comparisons
 - **Output**: Baseline snapshots stored as GitHub Actions artifacts (not committed to repository)
 
 ### 2. PR Testing Workflow (`playwright-pr.yml`)
-- **Trigger**: Automatically runs on every pull request
+- **Trigger**: Automatically runs on every pull request or when playwright baseline completes
 - **Purpose**: Captures screenshots and compares them against the baseline
 - **Output**:
   - Visual diff report highlighting any changes
