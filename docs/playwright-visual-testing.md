@@ -113,12 +113,12 @@ For more flexible and programmatic mock data generation, we use the **@faker-js/
 Our CI/CD pipeline consists of two main workflows:
 
 ### 1. Baseline Generation Workflow (`playwright-baseline.yml`)
-- **Trigger**: Automatically runs when code is pushed to main/master branch
+- **Trigger**: Automatically runs when code is pushed to master branch
 - **Purpose**: Generates reference screenshots for future comparisons
 - **Output**: Baseline snapshots stored as GitHub Actions artifacts (not committed to repository)
 
 ### 2. PR Testing Workflow (`playwright-pr.yml`)
-- **Trigger**: Automatically runs on every pull request
+- **Trigger**: Automatically runs on every pull request or when playwright baseline completes
 - **Purpose**: Captures screenshots and compares them against the baseline
 - **Output**:
   - Visual diff report highlighting any changes
@@ -133,6 +133,38 @@ Our CI/CD pipeline consists of two main workflows:
 - **Access**: Configured with appropriate IAM policies for GitHub Actions
 
 ### CloudFront CDN
-- **Purpose**: Provides access to test reports
+- **Purpose**: Global content delivery network for test reports
 - **Key Benefits**:
-  - Secure public sharing without exposing S3 bucket directly
+  - **Security**: Prevents direct S3 bucket exposure while enabling public report access
+
+## Local Development Testing Flow
+
+When working on UI changes locally, you need to test against baseline snapshots. Since we don't commit snapshots to the repository, you generate them locally from the main branch.
+
+### How to Test Locally
+
+```bash
+# 1. Generate baseline from main branch
+git checkout main
+git pull origin main
+cd fe
+npm run test:update  # Creates baseline snapshots
+
+# 2. Switch to your feature branch
+git checkout your-feature-branch
+
+# 3. Run tests
+npm run test  # Compares against baseline
+
+# 4. If tests fail, review changes
+npm run test:ui  # Opens UI to see visual diffs
+```
+
+[!IMPORTANT]
+Snapshots are not committed to the repository
+
+## Playwright Tracing
+
+### Full Page Screenshots in Trace Viewer
+
+Playwright's trace viewer provides comprehensive debugging capabilities, including full-page screenshots at each test step. This feature is invaluable for understanding test failures and reviewing UI states.
