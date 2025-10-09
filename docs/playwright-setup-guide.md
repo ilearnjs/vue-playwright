@@ -4,10 +4,10 @@ This guide walks you through setting up Playwright for visual regression testing
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
-2. [Installation](#installation)
-3. [Mocking data](#step-3-mocking-data)
-4. [Setup CI workflow](#step-4-setup-ci-workflow)
-5. [AWS setup](#step-5-aws-setup)
+2. [Installation](#install-and-configure-playwright)
+3. [Mocking data](#mocking-data)
+4. [Setup CI workflow](#setup-ci-workflow)
+5. [AWS setup](#aws-setup)
 6. [Tips](#tips)
 
 ## Prerequisites
@@ -236,8 +236,6 @@ Many platforms can be used (Azure, Google Cloud, Netlify, etc.). We use Amazon A
    
 
 6. **Additional Settings**:
-
-   **Price class**:
 
    **AWS WAF web ACL**: **None** (unless you need extra security)
 
