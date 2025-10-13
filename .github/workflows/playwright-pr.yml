@@ -2,12 +2,12 @@ name: Playwright PR Tests
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ master, main ]
   workflow_run:
     workflows: ["Playwright Baseline"]
     types:
       - completed
-    branches: [ master ]
+    branches: [ master, main ]
   workflow_dispatch:
 
 permissions:

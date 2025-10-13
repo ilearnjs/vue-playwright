@@ -2,9 +2,9 @@ name: Playwright Baseline
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, main ]
   workflow_dispatch:
-    branches: [ master ]
+    branches: [ master, main ]
 
 permissions:
   contents: read
