@@ -34,7 +34,7 @@ export const login = async (request: FastifyRequest, reply: FastifyReply): Promi
 
     reply.setCookie('session_id', sessionId, {
       path: '/',
-      httpOnly: false,  // Allow JavaScript to read the cookie
+      httpOnly: false,
       secure: false,
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000
@@ -58,7 +58,7 @@ export const logout = async (request: FastifyRequest, reply: FastifyReply): Prom
       sessionService.deleteSession(sessionId)
     }
 
-    reply.clearCookie('session_id')
+    reply.clearCookie('session_id', { path: '/' })
 
     reply.send({})
   } catch (error) {
