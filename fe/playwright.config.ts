@@ -74,7 +74,6 @@ export default defineConfig({
   workers: undefined,
   use: {
     baseURL: 'http://localhost:5173',
-    trace: 'on'
   },
 
   outputDir: './.tests/test-results/',
