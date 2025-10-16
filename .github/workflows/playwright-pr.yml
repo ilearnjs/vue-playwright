@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   test:
@@ -67,6 +68,7 @@ jobs:
         name: playwright-baseline-snapshots
         path: fe/.tests/snaps/
         search_artifacts: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Verify baseline snapshots
       run: |
