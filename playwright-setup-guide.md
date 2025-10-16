@@ -116,7 +116,7 @@ We suggest using the Faker library to generate mock data.
 Faker allows you to generate realistic random data. To make visual tests stable, you need to set a seed.
 
 For more details see [Faker documentation](https://fakerjs.dev/).
-For full example check [PR](https://github.com/ilearnjs/vue-playwright/pull/18).
+For full example check [PR](https://github.com/epicmaxco/vue-playwright/pull/1).
 
 Example:
 
@@ -268,20 +268,89 @@ To automatically delete old test reports and save storage costs:
 
 7. Click **"Create distribution"**
 
-### Step 5.3: GH secrets/variables
+### Step 5.3: Create IAM User for S3 Access
 
-To find your GitHub repository secrets and variables, go to your repository -> settings -> secrets and variables -> actions
+Before adding GitHub secrets, you need to create an AWS IAM user with appropriate S3 permissions:
 
-Add following secrets to your repository:
+#### Creating IAM User
 
-- AWS_ACCESS_KEY_ID - access key id for user with programmatic access and permissions to upload to S3
-- AWS_SECRET_ACCESS_KEY - secret access key for user with programmatic access and permissions to upload to S3
-- AWS_REGION - e.g. us-east-1
-- S3_BUCKET - name of the S3 bucket
+1. Navigate to **IAM** in AWS Console (search for "IAM" in the top search bar)
 
-Add following variables to your repository:
+2. Click **"Users"** in the left sidebar, then **"Create user"**
 
-- CLOUDFRONT_URL - URL of the CloudFront distribution
+3. Configure user details:
+   - **User name**: `github-actions-playwright` (or similar descriptive name)
+   - **Access type**: ✅ Check **"Programmatic access"** (provides access key ID and secret)
+
+4. Click **"Next"** to set permissions
+
+#### Setting Permissions
+
+**Create Custom Policy**
+
+1. Click **"Create policy"**
+2. Switch to **"JSON"** tab and paste this policy:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::playwright-reports-yourproject"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::playwright-reports-yourproject/playwright-reports/*"
+    }
+  ]
+}
+```
+
+> [!NOTE]
+> - Replace `playwright-reports-yourproject` with your actual S3 bucket name
+> - The `/playwright-reports/*` path in the second Resource matches the upload path in the GitHub workflow (line 142). If you change the S3 path in your workflow, update this policy accordingly
+> - This policy grants minimal permissions needed for the GitHub Actions workflow to use `aws s3 sync --delete`
+
+3. Click **"Next: Tags"**, then **"Next: Review"**
+4. **Name**: `GitHubActionsPlaywrightS3Policy`
+5. Click **"Create policy"**
+6. Return to user creation, select your new policy
+7. Click **"Next"**
+
+#### Complete User Creation
+
+1. Review the configuration and click **"Create user"**
+
+2. **IMPORTANT**: On the success page, you'll see:
+   - **Access key ID**: Copy this immediately
+   - **Secret access key**: Click **"Show"** and copy this immediately
+
+> [!WARNING]
+> This is the ONLY time you'll see the secret access key! If you lose it, you'll need to create new credentials.
+
+> [!TIP]
+> Save these credentials temporarily in a secure password manager or notepad. You'll add them to GitHub secrets next.
+
+### Step 5.4: GitHub Secrets and Variables
+
+To find your GitHub repository secrets and variables, go to your repository -> Settings -> Secrets and variables -> Actions
+
+Add following **secrets** to your repository:
+
+- **AWS_ACCESS_KEY_ID** - The access key ID you copied from IAM user creation
+- **AWS_SECRET_ACCESS_KEY** - The secret access key you copied from IAM user creation
+- **AWS_REGION** - Your AWS region (e.g., `us-east-1`, `eu-west-1`)
+- **S3_BUCKET_NAME** - Name of your S3 bucket (e.g., `playwright-reports-yourproject`)
+
+Add following **variables** to your repository:
+
+- **CLOUDFRONT_DOMAIN** - Domain of your CloudFront distribution (without https://, e.g., `d1234567890abc.cloudfront.net`)
 
 > [!WARNING]
 > It is not a good idea to share an AWS S3 bucket URL publicly. Instead, we suggest using CloudFront.
