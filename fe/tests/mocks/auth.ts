@@ -9,7 +9,6 @@ export function generateUser(): User {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     email: faker.internet.email(),
-    avatar: faker.image.avatar(),
   }
 }
 
