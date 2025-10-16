@@ -46,9 +46,12 @@ export default defineConfig({
     process.env.CI ? ["github"] : ["line"],
   ],
 
-  // trace: 'on' is useful to see full page screenshots even for successful tests
+  // do one retry on CI to write trace
+  retries: process.env.CI ? 1 : 0,
+
+  // trace: record trace for first retry
   use: {
-    trace: "on",
+    trace: "on-first-retry",
   },
   // list of browsers to test against
   projects: [
