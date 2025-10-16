@@ -23,6 +23,22 @@ Visual regression testing helps us:
 - Detect unintended UI changes early in the development cycle
 - Enable confident large-scale refactoring
 
+### Approach Assessment
+
+**Where This Approach Excels:**
+- **Small to medium teams** with straightforward UI requirements
+- **Projects prioritizing visual consistency** over complex user flows
+- **Rapid prototyping** where backend isn't ready yet
+- **Component libraries** needing visual regression coverage
+
+**Limitations to Consider:**
+- **Not suitable for E2E testing** - Mocked backends miss integration issues
+- **Doesn't scale well** for complex user journeys or state management
+- **Limited for dynamic content** - Real-time features need different strategies
+- **Requires discipline** - Mock maintenance overhead grows with API complexity
+
+This approach offers a pragmatic balance between test reliability and implementation speed, but teams should evaluate if visual-only testing meets their quality requirements.
+
 ### Why Mock the Backend?
 We chose to mock all backend interactions for several key reasons:
 
