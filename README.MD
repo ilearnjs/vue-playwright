@@ -28,8 +28,7 @@ Visual regression testing helps us:
 **Where This Approach Excels:**
 - **Small to medium teams** with straightforward UI requirements
 - **Projects prioritizing visual consistency** over complex user flows
-- **Rapid prototyping** where backend isn't ready yet
-- **Component libraries** needing visual regression coverage
+- **Pages and components** needing visual regression coverage
 
 **Limitations to Consider:**
 - **Not suitable for E2E testing** - Mocked backends miss integration issues
