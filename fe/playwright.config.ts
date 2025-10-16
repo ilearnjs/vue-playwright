@@ -70,11 +70,11 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   workers: undefined,
   use: {
     baseURL: 'http://localhost:5173',
-    trace: 'on'
+    trace: 'on-first-retry',
   },
 
   outputDir: './.tests/test-results/',
