@@ -155,10 +155,12 @@ Description of the workflow steps:
 
 - Checkout code
 - Setup Node.js
-- Cache yarn dependencies
-- Install yarn dependencies
-- Cache playwright
-- Install playwright - if playwright cache hit - fast install, if miss - full install including browser download
+- Restore yarn dependencies cache - attempts to restore from cache using exact key match, falls back to partial matches
+- Install yarn dependencies - only runs if cache miss
+- Save yarn dependencies cache - explicitly saves cache after installation (only on cache miss)
+- Restore Playwright browsers cache - attempts to restore from cache using exact key match, falls back to partial matches
+- Install Playwright - if cache hit: installs only system dependencies; if cache miss: full install including browser download
+- Save Playwright browsers cache - explicitly saves cache after installation (only on cache miss)
 - Generate baseline snapshots
 - Upload baseline snapshots as artifact - we use GH for storing artifacts
 - Generate summary
@@ -171,10 +173,12 @@ Description of the workflow steps:
 
 - Checkout code
 - Setup Node.js
-- Cache yarn dependencies
-- Install yarn dependencies
-- Cache playwright
-- Install playwright - if playwright cache hit - fast install, if miss - full install including browser download
+- Restore yarn dependencies cache - attempts to restore from cache using exact key match, falls back to partial matches
+- Install yarn dependencies - only runs if cache miss
+- Save yarn dependencies cache - explicitly saves cache after installation (only on cache miss)
+- Restore Playwright browsers cache - attempts to restore from cache using exact key match, falls back to partial matches
+- Install Playwright - if cache hit: installs only system dependencies; if cache miss: full install including browser download
+- Save Playwright browsers cache - explicitly saves cache after installation (only on cache miss)
 - Download baseline snapshots artifact
 - Verify baseline snapshots are downloaded
 - Tests - compare PR snapshots with baseline
@@ -186,6 +190,9 @@ Description of the workflow steps:
 
 > [!NOTE]
 > This workflow will not work for free private repositories.
+
+> [!NOTE]
+> The workflows use explicit `actions/cache/restore` and `actions/cache/save` steps instead of the combined `actions/cache` action. This ensures that caches are properly saved even when partial cache matches occur via `restore-keys`, preventing repeated dependency installations on subsequent runs.
 
 ## AWS setup
 

@@ -26,8 +26,8 @@ jobs:
       with:
         node-version: 22.18.0
 
-    - name: Cache yarn dependencies
-      uses: actions/cache@v4
+    - name: Restore yarn dependencies cache
+      uses: actions/cache/restore@v4
       id: yarn-cache
       with:
         path: fe/node_modules
@@ -40,8 +40,15 @@ jobs:
       working-directory: ./fe
       run: yarn install --frozen-lockfile
 
-    - name: Cache Playwright browsers
-      uses: actions/cache@v4
+    - name: Save yarn dependencies cache
+      if: steps.yarn-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: fe/node_modules
+        key: yarn-${{ hashFiles('fe/yarn.lock') }}
+
+    - name: Restore Playwright browsers cache
+      uses: actions/cache/restore@v4
       id: playwright-cache
       with:
         path: ~/.cache/ms-playwright
@@ -59,6 +66,13 @@ jobs:
           echo "Cache hit - installing only system dependencies"
           npx playwright install-deps > /dev/null # --quiet
         fi
+
+    - name: Save Playwright browsers cache
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('fe/yarn.lock') }}
 
     - name: Download baseline snapshots from master workflow
       uses: dawidd6/action-download-artifact@v6
