@@ -21,7 +21,7 @@ This guide walks you through setting up Playwright for visual regression testing
 Note: The recommended location to install Playwright is in the root of your frontend project. Alternatively, it can be installed as a separate package in a monorepo.
 
 ```bash
-npm init playwright@latest
+yarn init playwright@latest
 ```
 
 You can use default options for all steps.
@@ -46,9 +46,12 @@ export default defineConfig({
     process.env.CI ? ["github"] : ["line"],
   ],
 
-  // trace: 'on' is useful to see full page screenshots even for successful tests
+  // do one retry on CI to write trace
+  retries: process.env.CI ? 1 : 0,
+
+  // trace: record trace for first retry
   use: {
-    trace: "on",
+    trace: "on-first-retry",
   },
   // list of browsers to test against
   projects: [
@@ -56,7 +59,7 @@ export default defineConfig({
   ],
   // start web app before tests
   webServer: {
-    command: "npm run dev",
+    command: "yarn run dev",
     url: "http://localhost:5173",
   },
 });
@@ -202,7 +205,7 @@ To make HTML reports accessible, we upload them to S3 and use CloudFront to deli
 - **Bucket name**: `playwright-reports-yourproject` (must be globally unique)
 - **Object Ownership**: Keep "ACLs disabled" (recommended)
 - **Block Public Access settings**:
-  - ✅ Keep all boxes **checked**
+  - Keep all boxes **checked**
   - Click to confirm "Block all public access"
 
 - **Bucket Versioning**:
@@ -228,7 +231,7 @@ To automatically delete old test reports and save storage costs:
    - **Rule scope**: Choose **"Apply to all objects in the bucket"** or use prefix `playwright-reports/` if you organize by folders
 
 5. **Lifecycle rule actions**:
-   - ✅ Check **"Expire current versions of objects"**
+   - Check **"Expire current versions of objects"**
    - Set **"Days after object creation"**: `60` (or your preferred retention period)
 
 6. Click **"Create rule"**

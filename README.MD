@@ -1,6 +1,10 @@
 # Playwright Visual Testing
 
-[Read the Setup Guide »](./playwright-setup-guide.md)
+[Playwright Setup Guide »](./docs/playwright-setup-guide.md)
+
+[How to Test Locally »](./docs/pw-local-testing.md)
+
+[Report](./docs/pw-report.md)
 
 ## Quick Introduction
 
@@ -142,28 +146,6 @@ Our CI/CD pipeline consists of two main workflows:
 ## Local Development Testing Flow
 
 When working on UI changes locally, you need to test against baseline snapshots. Since we don't commit snapshots to the repository, you generate them locally from the main branch.
-
-### How to Test Locally
-
-```bash
-# 1. Generate baseline from main branch
-git checkout main
-git pull origin main
-cd fe
-npm run test:update  # Creates baseline snapshots
-
-# 2. Switch to your feature branch
-git checkout your-feature-branch
-
-# 3. Run tests
-npm run test  # Compares against baseline
-
-# 4. If tests fail, review changes
-npm run test:ui  # Opens UI to see visual diffs
-```
-
-[!IMPORTANT]
-Snapshots are not committed to the repository
 
 ## Playwright Tracing
 
