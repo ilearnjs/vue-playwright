@@ -119,7 +119,7 @@ We suggest using the Faker library to generate mock data.
 Faker allows you to generate realistic random data. To make visual tests stable, you need to set a seed.
 
 For more details see [Faker documentation](https://fakerjs.dev/).
-For full example check [PR](https://github.com/ilearnjs/vue-playwright/pull/18).
+For full example check [PR](https://github.com/ilearnjs/vue-playwright/pull/28).
 
 Example:
 
