@@ -1,7 +1,10 @@
 # Playwright Visual Testing
 
 [Playwright Setup Guide »](./docs/playwright-setup-guide.md)
+
 [How to Test Locally »](./docs/pw-local-testing.md)
+
+[Report](./docs/pw-report.md)
 
 ## Quick Introduction
 

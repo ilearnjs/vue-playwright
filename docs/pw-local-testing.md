@@ -7,19 +7,19 @@ You can test your UI changes locally by generating baseline snapshots from the m
 git checkout main
 git pull origin main
 cd fe
-npm run test:update  # Creates baseline snapshots
+yarn test:update  # Creates baseline snapshots
 
 # 2. Switch to your feature branch
 git checkout your-feature-branch
 
 # 3. Run tests
-npm run test  # Compares against baseline
+yarn test  # Compares against baseline
 
 # 4. If tests fail, review changes
-npm run test:ui  # Opens UI to see visual diffs
+yarn test:ui  # Opens UI to see visual diffs
 # or
-npm playwright show-report .playwright/test-results/  # Opens report in browser
+yarn playwright show-report  # Opens report in browser
 ```
 
-[!IMPORTANT]
-Snapshots are not committed to the repository
+> [!IMPORTANT]
+> Snapshots are not committed to the repository

@@ -1,8 +1,8 @@
-# Playwright Test Reports and Page State Debugging
+# Playwright Test Reports
 
 This guide explains how to access and use Playwright test reports for debugging failed tests and reviewing test execution.
 
-## 📊 Accessing Test Reports
+## Accessing Test Reports
 
 After each test run, Playwright generates a comprehensive HTML report that's automatically uploaded to our CDN.
 
